@@ -8,19 +8,14 @@ namespace ZBase.Foundation.Pooling.UnityPools
 {
     [Serializable]
     public class UnityPool<T, TPrefab>
-        : IUnityPool<T, TPrefab>, IShareable, IDisposable
-        where T : UnityEngine.Object
-        where TPrefab : IPrefab<T>
+        : IUnityPool<T, TPrefab>, IShareable, IDisposable where T : UnityEngine.Object where TPrefab : IPrefab<T>
     {
         private readonly UniqueQueue<int, T> _queue;
 
         [SerializeField]
         private TPrefab _prefab;
 
-        public UnityPool()
-        {
-            _queue = new UniqueQueue<int, T>();
-        }
+        public UnityPool() => _queue = new UniqueQueue<int, T>();
 
         public UnityPool(TPrefab prefab)
         {
@@ -29,9 +24,7 @@ namespace ZBase.Foundation.Pooling.UnityPools
         }
 
         public UnityPool(UniqueQueue<int, T> queue)
-        {
-            _queue = queue ?? throw new ArgumentNullException(nameof(queue));
-        }
+            => _queue = queue ?? throw new ArgumentNullException(nameof(queue));
 
         public UnityPool(UniqueQueue<int, T> queue, TPrefab prefab)
         {
@@ -51,10 +44,7 @@ namespace ZBase.Foundation.Pooling.UnityPools
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Count() => _queue.Count;
 
-        public void Dispose()
-        {
-            _queue.Dispose();
-        }
+        public void Dispose() => _queue.Dispose();
 
         /// <inheritdoc/>
         public void ReleaseInstances(int keep, Action<T> onReleased = null)
@@ -70,16 +60,14 @@ namespace ZBase.Foundation.Pooling.UnityPools
                     else if (_prefab != null)
                         _prefab.Release(instance);
                 }
-
                 countRemove--;
             }
         }
 
         public async UniTask<T> Rent()
         {
-            if (_queue.TryDequeue(out var _, out var instance))
+            if (_queue.TryDequeue(out _, out var instance))
                 return instance;
-
             return await _prefab.Instantiate();
         }
 
@@ -87,7 +75,6 @@ namespace ZBase.Foundation.Pooling.UnityPools
         {
             if (_queue.TryDequeue(out var _, out var instance))
                 return instance;
-
             return await _prefab.Instantiate(cancelToken);
         }
 
@@ -95,7 +82,6 @@ namespace ZBase.Foundation.Pooling.UnityPools
         {
             if (instance == false)
                 return;
-
             ReturnPreprocess(instance);
             _queue.TryEnqueue(instance.GetInstanceID(), instance);
         }

@@ -23,7 +23,7 @@ namespace ZBase.Foundation.Pooling.UnityPools
             set => _prepoolOnStart = value;
         }
 
-        private readonly UnityPrepooler<T, TPrefab, TPool> _prepooler = default;
+        private readonly UnityPrePool<T, TPrefab, TPool> _prePool = default;
 
         protected void Awake()
         {
@@ -46,7 +46,7 @@ namespace ZBase.Foundation.Pooling.UnityPools
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async UniTask Prepool(CancellationToken cancelToken)
-            => await _prepooler.Prepool(Pool.Prefab, Pool, this.transform, cancelToken);
+            => await this._prePool.PrePool(Pool.Prefab, Pool, this.transform, cancelToken);
 
         protected virtual void OnAwake() { }
 

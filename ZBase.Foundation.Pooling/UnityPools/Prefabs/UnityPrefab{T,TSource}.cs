@@ -3,6 +3,7 @@ using System.Threading;
 using System.Runtime.CompilerServices;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace ZBase.Foundation.Pooling.UnityPools
 {
@@ -11,20 +12,14 @@ namespace ZBase.Foundation.Pooling.UnityPools
         : IPrefab<T, TSource>
         where T : class
     {
-        [SerializeField]
-        private TSource _source;
-
-        [SerializeField]
-        private Transform _parent;
-
-        [SerializeField]
-        private int _prepoolAmount;
+        [SerializeField] private TSource _source;
+        [SerializeField] private Transform _parent;
+        [SerializeField] private int _prePoolAmount;
 
         public TSource Source
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _source;
-
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => _source = value;
         }
@@ -33,25 +28,22 @@ namespace ZBase.Foundation.Pooling.UnityPools
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _parent;
-
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => _parent = value;
         }
 
-        public int PrepoolAmount
+        public int PrePoolAmount
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => _prepoolAmount;
-
+            get => this._prePoolAmount;
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => _prepoolAmount = value;
+            set => this._prePoolAmount = value;
         }
 
         public async UniTask<T> Instantiate()
         {
             if (_source is null)
                 throw new NullReferenceException(nameof(Source));
-
             return await Instantiate(Source, Parent);
         }
 
@@ -59,16 +51,14 @@ namespace ZBase.Foundation.Pooling.UnityPools
         {
             if (_source is null)
                 throw new NullReferenceException(nameof(Source));
-
             return await Instantiate(Source, Parent, cancelToken);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected abstract UniTask<T> Instantiate(
-              TSource source
+            TSource source
             , Transform parent
-            , CancellationToken cancelToken = default)
-        ;
+            , CancellationToken cancelToken = default);
 
         public abstract void Release(T instance);
     }

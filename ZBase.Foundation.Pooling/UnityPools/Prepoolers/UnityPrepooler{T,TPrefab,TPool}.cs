@@ -4,32 +4,31 @@ using UnityEngine;
 
 namespace ZBase.Foundation.Pooling.UnityPools
 {
-    public struct UnityPrepooler<T, TPrefab, TPool>
-        : IPrepooler<T, TPrefab, TPool>
-        where T : UnityEngine.Object
-        where TPrefab : IPrefab<T>
-        where TPool : IReturnable<T>
+    public struct UnityPrePool<T, TPrefab, TPool>
+        : IPrePool<T, TPrefab, TPool> where T : Object where TPrefab : IPrefab<T> where TPool : IReturnable<T>
     {
-        public async UniTask Prepool(
-              TPrefab prefab
-            , TPool pool
-            , Transform defaultParent
-            , CancellationToken cancelToken = default
-        )
+        public readonly async UniTask PrePool(
+            TPrefab prefab , TPool pool , Transform defaultParent , CancellationToken cancelToken = default )
         {
             if (prefab == null)
+            {
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.prefab);
+                return;
+            }
 
             if (pool == null)
+            {
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.pool);
+                return;
+            }
 
-            if (prefab.PrepoolAmount <= 0)
+            if (prefab.PrePoolAmount <= 0)
                 return;
 
             if (prefab.Parent == false && defaultParent)
                 prefab.Parent = defaultParent;
 
-            for (int i = 0, count = prefab.PrepoolAmount; i < count; i++)
+            for (int i = 0; i < prefab.PrePoolAmount; i++)
             {
                 var instance = await prefab.Instantiate(cancelToken);
                 pool.Return(instance);

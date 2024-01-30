@@ -9,18 +9,11 @@ namespace ZBase.Foundation.Pooling.UnityPools
     public class GameObjectPrefab : UnityPrefab<GameObject, GameObject>
     {
         protected override async UniTask<GameObject> Instantiate(
-              GameObject source
-            , Transform parent
-            , CancellationToken cancelToken
-        )
+            GameObject source, Transform parent, CancellationToken cancelToken = default)
         {
-            GameObject instance;
-
-            if (parent)
-                instance = UnityEngine.Object.Instantiate(Source, parent, true);
-            else
-                instance = UnityEngine.Object.Instantiate(Source);
-
+            GameObject instance = parent
+                ? UnityEngine.Object.Instantiate(this.Source, parent, true)
+                : UnityEngine.Object.Instantiate(this.Source);
             return await UniTask.FromResult(instance);
         }
 

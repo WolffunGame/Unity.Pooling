@@ -6,11 +6,9 @@ using ZBase.Foundation.Pooling.UnityPools;
 namespace ZBase.Foundation.Pooling.AddressableAssets
 {
     [Serializable]
-    public class AssetRefGameObjectPool
-        : GameObjectPool<AssetRefGameObjectPrefab>
+    public class AssetRefGameObjectPool : GameObjectPool<AssetRefGameObjectPrefab>
     {
         public AssetRefGameObjectPool()
-            : base()
         { }
 
         public AssetRefGameObjectPool(AssetRefGameObjectPrefab prefab)

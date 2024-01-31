@@ -19,8 +19,8 @@ namespace ZBase.Foundation.Pooling.AddressableAssets.Items
 
         private void OnDestroy()
         {
-            _pool.RemoveItem(_instance);
-            _prefab.Release(_instance);
+            _pool?.RemoveItem(_instance);
+            _prefab?.Release(_instance);
         } 
     }
 }

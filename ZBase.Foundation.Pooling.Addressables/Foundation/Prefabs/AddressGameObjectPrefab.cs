@@ -13,8 +13,7 @@ namespace ZBase.Foundation.Pooling.AddressableAssets
         protected override async UniTask<GameObject> Instantiate(
             string source, Transform parent, CancellationToken cancelToken = default)
         {
-            AsyncOperationHandle<GameObject> handle =
-                parent ? Addressables.InstantiateAsync(source, parent) : Addressables.InstantiateAsync(source);
+            var handle = parent ? Addressables.InstantiateAsync(source, parent) : Addressables.InstantiateAsync(source);
             return await handle.WithCancellation(cancelToken);
         }
 

@@ -12,8 +12,7 @@ namespace ZBase.Foundation.Pooling.UnityPools
     {
         private readonly UniqueQueue<int, T> _queue;
 
-        [SerializeField]
-        private TPrefab _prefab;
+        [SerializeField] private TPrefab _prefab;
 
         public UnityPool() => _queue = new UniqueQueue<int, T>();
 
@@ -23,8 +22,7 @@ namespace ZBase.Foundation.Pooling.UnityPools
             _prefab = prefab ?? throw new ArgumentNullException(nameof(prefab));
         }
 
-        public UnityPool(UniqueQueue<int, T> queue)
-            => _queue = queue ?? throw new ArgumentNullException(nameof(queue));
+        public UnityPool(UniqueQueue<int, T> queue) => _queue = queue ?? throw new ArgumentNullException(nameof(queue));
 
         public UnityPool(UniqueQueue<int, T> queue, TPrefab prefab)
         {
@@ -53,37 +51,52 @@ namespace ZBase.Foundation.Pooling.UnityPools
 
             while (countRemove > 0)
             {
-                if (_queue.TryDequeue(out var _, out var instance))
+                if (_queue.TryDequeue(out var instance))
                 {
                     if (onReleased != null)
                         onReleased(instance);
                     else if (_prefab != null)
                         _prefab.Release(instance);
                 }
+
                 countRemove--;
             }
         }
 
         public async UniTask<T> Rent()
         {
-            if (_queue.TryDequeue(out _, out var instance))
+            if (_queue.TryDequeue(out var instance))
                 return instance;
-            return await _prefab.Instantiate();
+            instance = await _prefab.Instantiate();
+            ProcessNewInstance(instance);
+            return instance;
         }
 
         public async UniTask<T> Rent(CancellationToken cancelToken)
         {
-            if (_queue.TryDequeue(out var _, out var instance))
+            if (_queue.TryDequeue(out var instance))
                 return instance;
-            return await _prefab.Instantiate(cancelToken);
+            instance = await _prefab.Instantiate(cancelToken);
+            ProcessNewInstance(instance);
+            return instance;
         }
+
+        protected virtual void ProcessNewInstance(T instance) { }
 
         public void Return(T instance)
         {
-            if (instance == false)
+            if (!instance)
                 return;
             ReturnPreprocess(instance);
             _queue.TryEnqueue(instance.GetInstanceID(), instance);
+        }
+        
+        public void RemoveItem(T instance)
+        {
+            if (!instance)
+                return;
+            ReturnPreprocess(instance);
+            _queue.Remove(instance.GetInstanceID());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

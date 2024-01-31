@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using ZBase.Foundation.Pooling;
 using ZBase.Foundation.Pooling.UnityPools;
 
 namespace ZBase.Foundation.Pooling.AddressableAssets
@@ -9,18 +8,20 @@ namespace ZBase.Foundation.Pooling.AddressableAssets
     public class AssetRefGameObjectPool : GameObjectPool<AssetRefGameObjectPrefab>
     {
         public AssetRefGameObjectPool()
-        { }
+        {
+        }
 
-        public AssetRefGameObjectPool(AssetRefGameObjectPrefab prefab)
-            : base(prefab)
-        { }
+        public AssetRefGameObjectPool(AssetRefGameObjectPrefab prefab) : base(prefab)
+        {
+        }
 
-        public AssetRefGameObjectPool(UniqueQueue<int, GameObject> queue)
-            : base(queue)
-        { }
+        public AssetRefGameObjectPool(UniqueQueue<int, GameObject> queue) : base(queue)
+        {
+        }
 
         public AssetRefGameObjectPool(UniqueQueue<int, GameObject> queue, AssetRefGameObjectPrefab prefab)
             : base(queue, prefab)
-        { }
+        {
+        }
     }
 }

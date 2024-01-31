@@ -24,6 +24,7 @@ namespace ZBase.Foundation.Pooling.UnityPools
         public GameObjectPool(UniqueQueue<int, GameObject> queue, TPrefab prefab) : base(queue, prefab)
         {
         }
+        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override void ReturnPreprocess(GameObject instance)

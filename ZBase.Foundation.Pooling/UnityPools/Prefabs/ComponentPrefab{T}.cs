@@ -6,8 +6,7 @@ using UnityEngine;
 namespace ZBase.Foundation.Pooling.UnityPools
 {
     [Serializable]
-    public class ComponentPrefab<T> : UnityPrefab<T, T>
-        where T : UnityEngine.Component
+    public class ComponentPrefab<T> : UnityPrefab<T, T> where T : Component
     {
         protected override async UniTask<T> Instantiate(
               T source

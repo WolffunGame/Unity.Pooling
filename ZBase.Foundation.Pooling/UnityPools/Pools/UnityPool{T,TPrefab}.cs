@@ -48,7 +48,6 @@ namespace ZBase.Foundation.Pooling.UnityPools
         public void ReleaseInstances(int keep, Action<T> onReleased = null)
         {
             var countRemove = _queue.Count - keep;
-
             while (countRemove > 0)
             {
                 if (_queue.TryDequeue(out var instance))

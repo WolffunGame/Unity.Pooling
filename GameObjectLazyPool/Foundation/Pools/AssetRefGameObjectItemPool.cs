@@ -1,19 +1,18 @@
 ﻿using System;
 using UnityEngine;
 using ZBase.Foundation.Pooling.AddressableAssets;
-using ZBase.Foundation.Pooling.AddressableAssets.Items;
 
-namespace ZBase.Foundation.Pooling.ItemPooling
+namespace ZBase.Foundation.Pooling.GameObject.LazyPool
 {
     public class AssetRefGameObjectItemPool : AssetRefGameObjectPool
     {
-        internal event Action<GameObject> OnReturn;
+        internal event Action<UnityEngine.GameObject> OnReturn;
         
         public AssetRefGameObjectItemPool(AssetRefGameObjectPrefab prefab) : base(prefab)
         {
         }
         
-        protected override void ProcessNewInstance(GameObject instance)
+        protected override void ProcessNewInstance(UnityEngine.GameObject instance)
         {
             base.ProcessNewInstance(instance);
             if (!instance.TryGetComponent<AssetRefGameObjectPoolItem>(out var poolItem))
@@ -21,7 +20,7 @@ namespace ZBase.Foundation.Pooling.ItemPooling
             poolItem.SetUp(this, instance, Prefab);
         }
 
-        protected override void ReturnPreprocess(GameObject instance)
+        protected override void ReturnPreprocess(UnityEngine.GameObject instance)
         {
             base.ReturnPreprocess(instance);
             OnReturn?.Invoke(instance);

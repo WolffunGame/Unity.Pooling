@@ -3,14 +3,11 @@ using System.Threading;
 using System.Runtime.CompilerServices;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace ZBase.Foundation.Pooling.UnityPools
 {
     [Serializable]
-    public abstract class UnityPrefab<T, TSource>
-        : IPrefab<T, TSource>
-        where T : class
+    public abstract class UnityPrefab<T, TSource> : IPrefab<T, TSource> where T : class
     {
         [SerializeField] private TSource _source;
         [SerializeField] private Transform _parent;

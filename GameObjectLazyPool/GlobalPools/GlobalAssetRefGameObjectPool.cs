@@ -16,10 +16,14 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
         
         public async UniTask<UnityEngine.GameObject> Rent(AssetReferenceGameObject gameObjectReference)
         {
-            if(!_poolKeyCache.TryGetValue(gameObjectReference, out var key))
+            if (!_poolKeyCache.TryGetValue(gameObjectReference, out var key))
+            {
                 _poolKeyCache.Add(gameObjectReference, key = new AssetRefGameObjectPrefab {
                     Source = gameObjectReference,
                 });
+                Debug.LogError( $"add key");
+            }
+               
             return await Rent(key);
         }
 
@@ -62,8 +66,13 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
         {
             if(!this._prefabToAssetReference.Remove(gameObject, out var assetReference))
                 return;
-            if(_poolKeyCache.ContainsKey(assetReference.Source))
-                _poolKeyCache.Remove(assetReference.Source);
-        } 
+            if (!this._pools.TryGetValue(assetReference, out var pool) || pool.Count() != 0)
+                return;
+
+            this._pools.Remove(assetReference);
+            pool.OnReturn -= OnReturnToPool;
+            if(this._poolKeyCache.ContainsKey(assetReference.Source))
+                this._poolKeyCache.Remove(assetReference.Source);
+        }
     }
 }

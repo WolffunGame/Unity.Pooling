@@ -9,7 +9,6 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
     public class GlobalGameObjectPool : IPool, IShareable
     {
         private readonly Dictionary<GameObjectPrefab, GameObjectItemPool> _pools = new();
-        
         private readonly Dictionary<UnityEngine.GameObject, GameObjectPrefab> _prefabToAssetReference = new();
         private readonly Dictionary<UnityEngine.GameObject, GameObjectPrefab> _poolKeyCache = new();
         

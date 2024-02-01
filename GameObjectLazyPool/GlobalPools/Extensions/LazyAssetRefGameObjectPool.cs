@@ -1,4 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
+using UnityEngine.AddressableAssets;
 using ZBase.Foundation.Pooling.AddressableAssets;
 
 namespace ZBase.Foundation.Pooling.GameObject.LazyPool.Extensions
@@ -8,6 +9,9 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool.Extensions
     {
         private static GlobalAssetRefGameObjectPool GlobalGameObjectPool => SharedPool.Of<GlobalAssetRefGameObjectPool>();
 
+        public static async UniTask<UnityEngine.GameObject> Rent(AssetReferenceGameObject gameObjectReference)
+            => await GlobalGameObjectPool.Rent(gameObjectReference);
+        
         public static async UniTask<UnityEngine.GameObject> Rent(AssetRefGameObjectPrefab gameObjectReference)
             => await GlobalGameObjectPool.Rent(gameObjectReference);
         

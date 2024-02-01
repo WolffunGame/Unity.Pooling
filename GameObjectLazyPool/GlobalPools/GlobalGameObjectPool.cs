@@ -11,7 +11,16 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
         private readonly Dictionary<GameObjectPrefab, GameObjectItemPool> _pools = new();
         
         private readonly Dictionary<UnityEngine.GameObject, GameObjectPrefab> _prefabToAssetReference = new();
-
+        private readonly Dictionary<UnityEngine.GameObject, GameObjectPrefab> _poolKeyCache = new();
+        
+        public async UniTask<UnityEngine.GameObject> Rent(UnityEngine.GameObject gameObjectReference)
+        {
+            if (!_poolKeyCache.TryGetValue(gameObjectReference, out var key))
+                this._poolKeyCache.Add(gameObjectReference, key = new GameObjectPrefab {
+                    Source = gameObjectReference
+                });
+            return await Rent(key);
+        }
         public async UniTask<UnityEngine.GameObject> Rent(GameObjectPrefab gameObjectReference)
         {
             if (!_pools.TryGetValue(gameObjectReference, out var pool))
@@ -43,12 +52,18 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
                 pool.Return(gameObject);
         }
         
-        public void ReleaseInstances(int keep, System.Action<UnityEngine.GameObject> onReleased = null)
+        public void ReleaseInstances(int keep, Action<UnityEngine.GameObject> onReleased = null)
         {
             foreach (var pool in _pools.Values)
                 pool.ReleaseInstances(keep, onReleased);
         }
 
-        private void OnReturnToPool(UnityEngine.GameObject gameObject) => _prefabToAssetReference.Remove(gameObject);
+        private void OnReturnToPool(UnityEngine.GameObject gameObject)
+        {
+            if(!this._prefabToAssetReference.Remove(gameObject, out var assetReference))
+                return;
+            if(_poolKeyCache.ContainsKey(assetReference.Source))
+                _poolKeyCache.Remove(assetReference.Source);
+        } 
     }
 }

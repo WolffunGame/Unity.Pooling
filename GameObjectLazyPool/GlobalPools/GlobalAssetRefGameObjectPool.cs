@@ -20,15 +20,7 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
                 _poolKeyCache.Add(gameObjectReference, key = new AssetRefGameObjectPrefab {
                     Source = gameObjectReference,
                 });
-            if (!_pools.TryGetValue(key, out var pool))
-            {
-                pool = new AssetRefGameObjectItemPool(key);
-                pool.OnReturn += OnReturnToPool;
-                this._pools.Add(key, pool);
-            }
-            UnityEngine.GameObject item = await pool.Rent();
-            _prefabToAssetReference.Add(item, key);
-            return item;
+            return await Rent(key);
         }
 
         public async UniTask<UnityEngine.GameObject> Rent(AssetRefGameObjectPrefab gameObjectReference)

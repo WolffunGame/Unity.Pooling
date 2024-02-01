@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using ZBase.Foundation.Pooling.UnityPools;
@@ -15,6 +16,8 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
         {
             if (!_pools.TryGetValue(gameObjectReference, out var pool))
             {
+                if (gameObjectReference.Source.transform.root != null)
+                    throw new Exception($"Non Prefab not supported {gameObjectReference.Source.name}");
                 pool = new GameObjectItemPool(gameObjectReference);
                 pool.OnReturn += OnReturnToPool;
                 this._pools.Add(gameObjectReference, pool);

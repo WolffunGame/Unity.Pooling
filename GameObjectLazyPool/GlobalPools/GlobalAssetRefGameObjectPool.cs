@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using ZBase.Foundation.Pooling.AddressableAssets;
 
 namespace ZBase.Foundation.Pooling.GameObject.LazyPool
@@ -10,6 +11,25 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
         private readonly Dictionary<AssetRefGameObjectPrefab, AssetRefGameObjectItemPool> _pools = new();
         
         private readonly Dictionary<UnityEngine.GameObject, AssetRefGameObjectPrefab> _prefabToAssetReference = new();
+
+        private readonly Dictionary<AssetReferenceGameObject, AssetRefGameObjectPrefab> _poolKeyCache = new();
+        
+        public async UniTask<UnityEngine.GameObject> Rent(AssetReferenceGameObject gameObjectReference)
+        {
+            if(!_poolKeyCache.TryGetValue(gameObjectReference, out var key))
+                _poolKeyCache.Add(gameObjectReference, key = new AssetRefGameObjectPrefab {
+                    Source = gameObjectReference,
+                });
+            if (!_pools.TryGetValue(key, out var pool))
+            {
+                pool = new AssetRefGameObjectItemPool(key);
+                pool.OnReturn += OnReturnToPool;
+                this._pools.Add(key, pool);
+            }
+            UnityEngine.GameObject item = await pool.Rent();
+            _prefabToAssetReference.Add(item, key);
+            return item;
+        }
 
         public async UniTask<UnityEngine.GameObject> Rent(AssetRefGameObjectPrefab gameObjectReference)
         {
@@ -46,6 +66,12 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
                 pool.ReleaseInstances(keep, onReleased);
         }
 
-        private void OnReturnToPool(UnityEngine.GameObject gameObject) => _prefabToAssetReference.Remove(gameObject);
+        private void OnReturnToPool(UnityEngine.GameObject gameObject)
+        {
+            if(!this._prefabToAssetReference.Remove(gameObject, out var assetReference))
+                return;
+            if(_poolKeyCache.ContainsKey(assetReference.Source))
+                _poolKeyCache.Remove(assetReference.Source);
+        } 
     }
 }

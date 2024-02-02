@@ -25,7 +25,7 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
             var instanceID = gameObjectReference.Source.GetInstanceID();
             if (!_pools.TryGetValue(instanceID, out var pool))
             {
-                if (gameObjectReference.Source.transform.root != gameObjectReference.Source.transform)
+                if (gameObjectReference.Source.scene.IsValid())
                     throw new Exception($"Non Prefab not supported {gameObjectReference.Source.name}");
                 pool = new GameObjectItemPool(gameObjectReference);
                 pool.OnReturn += OnReturnToPool;
@@ -60,5 +60,14 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
         }
 
         private void OnReturnToPool(UnityEngine.GameObject gameObject) => _prefabToAssetReference.Remove(gameObject.GetInstanceID());
+        
+        public void Dispose()
+        {
+            foreach (var pool in _pools.Values)
+                pool.Dispose();
+            _pools.Clear();
+            _prefabToAssetReference.Clear();
+            _poolKeyCache.Clear();
+        }
     }
 }

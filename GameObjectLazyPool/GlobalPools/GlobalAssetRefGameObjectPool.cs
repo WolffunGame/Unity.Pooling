@@ -68,5 +68,14 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
                    x.Source.AssetGUID.Equals(y.Source.AssetGUID);
             public int GetHashCode(AssetRefGameObjectPrefab obj) => obj.Source.AssetGUID.GetHashCode();
         }
+        
+        public void Dispose()
+        {
+            foreach (var pool in _pools.Values)
+                pool.Dispose();
+            _pools.Clear();
+            _prefabToAssetReference.Clear();
+            _poolKeyCache.Clear();
+        }
     }
 }

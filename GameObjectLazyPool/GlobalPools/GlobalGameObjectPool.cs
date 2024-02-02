@@ -8,9 +8,7 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
 {
     public class GlobalGameObjectPool : IPool, IShareable
     {
-        private readonly Dictionary<GameObjectPrefab, GameObjectItemPool> _pools =
-            new(new GameObjectPrefabEqualityComparer());
-
+        private readonly Dictionary<int, GameObjectItemPool> _pools = new();
         private readonly Dictionary<int, GameObjectPrefab> _prefabToAssetReference = new();
         private readonly Dictionary<int, GameObjectPrefab> _poolKeyCache = new();
 
@@ -24,13 +22,14 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
 
         public async UniTask<UnityEngine.GameObject> Rent(GameObjectPrefab gameObjectReference)
         {
-            if (!_pools.TryGetValue(gameObjectReference, out var pool))
+            var instanceID = gameObjectReference.Source.GetInstanceID();
+            if (!_pools.TryGetValue(instanceID, out var pool))
             {
                 if (gameObjectReference.Source.transform.root != gameObjectReference.Source.transform)
                     throw new Exception($"Non Prefab not supported {gameObjectReference.Source.name}");
                 pool = new GameObjectItemPool(gameObjectReference);
                 pool.OnReturn += OnReturnToPool;
-                this._pools.Add(gameObjectReference, pool);
+                this._pools.Add(instanceID, pool);
             }
 
             UnityEngine.GameObject item = await pool.Rent();
@@ -50,7 +49,7 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
 
         public void Return(GameObjectPrefab gameObjectReference, UnityEngine.GameObject gameObject)
         {
-            if (_pools.TryGetValue(gameObjectReference, out var pool))
+            if (_pools.TryGetValue(gameObjectReference.Source.GetInstanceID(), out var pool))
                 pool.Return(gameObject);
         }
 
@@ -61,13 +60,5 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
         }
 
         private void OnReturnToPool(UnityEngine.GameObject gameObject) => _prefabToAssetReference.Remove(gameObject.GetInstanceID());
-
-        private class GameObjectPrefabEqualityComparer : IEqualityComparer<GameObjectPrefab>
-        {
-            public bool Equals(GameObjectPrefab x, GameObjectPrefab y) =>
-                y != null && y.Source != null && x != null && x.Source != null &&
-                x.Source.GetInstanceID() == y.Source.GetInstanceID();
-            public int GetHashCode(GameObjectPrefab obj) => obj.Source.GetInstanceID();
-        }
     }
 }

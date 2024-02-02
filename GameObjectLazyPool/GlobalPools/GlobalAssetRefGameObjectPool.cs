@@ -12,7 +12,7 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
         private readonly Dictionary<AssetRefGameObjectPrefab, AssetRefGameObjectItemPool> _pools =
             new(new AssetRefGameObjectPrefabEqualityComparer());
 
-        private readonly Dictionary<UnityEngine.GameObject, AssetRefGameObjectPrefab> _prefabToAssetReference = new();
+        private readonly Dictionary<int, AssetRefGameObjectPrefab> _prefabToAssetReference = new();
 
         private readonly Dictionary<AssetReferenceGameObject, AssetRefGameObjectPrefab> _poolKeyCache = new();
 
@@ -33,7 +33,7 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
                 this._pools.Add(gameObjectReference, pool);
             }
             UnityEngine.GameObject item = await pool.Rent();
-            _prefabToAssetReference.Add(item, gameObjectReference);
+            _prefabToAssetReference.Add(item.GetInstanceID(), gameObjectReference);
             return item;
         }
 
@@ -41,7 +41,7 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
         {
             if (!gameObject)
                 return;
-            if (_prefabToAssetReference.TryGetValue(gameObject, out var assetReference))
+            if (_prefabToAssetReference.TryGetValue(gameObject.GetInstanceID(), out var assetReference))
                 Return(assetReference, gameObject);
             else
                 Debug.LogError($"GameObject {gameObject.name} is not registered in the pool or was already returned.");
@@ -59,7 +59,7 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
                 pool.ReleaseInstances(keep, onReleased);
         }
 
-        private void OnReturnToPool(UnityEngine.GameObject gameObject) => _prefabToAssetReference.Remove(gameObject);
+        private void OnReturnToPool(UnityEngine.GameObject gameObject) => _prefabToAssetReference.Remove(gameObject.GetInstanceID());
 
         private class AssetRefGameObjectPrefabEqualityComparer : IEqualityComparer<AssetRefGameObjectPrefab>
         {

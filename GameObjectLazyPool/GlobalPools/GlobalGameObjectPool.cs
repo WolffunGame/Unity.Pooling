@@ -57,12 +57,6 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
                 pool.ReleaseInstances(keep, onReleased);
         }
 
-        private void OnReturnToPool(UnityEngine.GameObject gameObject)
-        {
-            if(!this._prefabToAssetReference.Remove(gameObject, out var assetReference))
-                return;
-            if(_poolKeyCache.ContainsKey(assetReference.Source))
-                _poolKeyCache.Remove(assetReference.Source);
-        } 
+        private void OnReturnToPool(UnityEngine.GameObject gameObject) => _prefabToAssetReference.Remove(gameObject);
     }
 }

@@ -10,6 +10,9 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool.Extensions
     {
         private static GlobalAssetRefGameObjectPool GlobalGameObjectPool => SharedPool.Of<GlobalAssetRefGameObjectPool>();
 
+        public static async UniTask<GameObject> Rent(string address)
+            => await GlobalGameObjectPool.Rent(address);
+
         public static async UniTask<GameObject> Rent(AssetReferenceGameObject gameObjectReference)
             => await GlobalGameObjectPool.Rent(gameObjectReference);
 

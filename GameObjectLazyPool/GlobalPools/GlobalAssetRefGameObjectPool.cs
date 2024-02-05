@@ -5,18 +5,18 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using ZBase.Foundation.Pooling.AddressableAssets;
 
-namespace ZBase.Foundation.Pooling.GameObject.LazyPool
+namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
 {
     public class GlobalAssetRefGameObjectPool : IPool, IShareable
     {
         private readonly Dictionary<AssetRefGameObjectPrefab, AssetRefGameObjectItemPool> _pools =
             new(new AssetRefGameObjectPrefabEqualityComparer());
 
-        private readonly Dictionary<int, AssetRefGameObjectPrefab> _prefabToAssetReference = new();
+        private readonly Dictionary<int, AssetRefGameObjectItemPool> _dicTrackingInstancePools = new();
 
         private readonly Dictionary<AssetReferenceGameObject, AssetRefGameObjectPrefab> _poolKeyCache = new();
 
-        public async UniTask<UnityEngine.GameObject> Rent(AssetReferenceGameObject gameObjectReference)
+        public async UniTask<GameObject> Rent(AssetReferenceGameObject gameObjectReference)
         {
             if (!_poolKeyCache.TryGetValue(gameObjectReference, out var key))
                 _poolKeyCache.Add(gameObjectReference,
@@ -24,7 +24,7 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
             return await Rent(key);
         }
 
-        public async UniTask<UnityEngine.GameObject> Rent(AssetRefGameObjectPrefab gameObjectReference)
+        public async UniTask<GameObject> Rent(AssetRefGameObjectPrefab gameObjectReference)
         {
             if (!_pools.TryGetValue(gameObjectReference, out var pool))
             {
@@ -32,50 +32,50 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
                 pool.OnReturn += OnReturnToPool;
                 this._pools.Add(gameObjectReference, pool);
             }
-            UnityEngine.GameObject item = await pool.Rent();
-            _prefabToAssetReference.Add(item.GetInstanceID(), gameObjectReference);
+            GameObject item = await pool.Rent();
+            _dicTrackingInstancePools.Add(item.GetInstanceID(), pool);
             return item;
         }
 
-        public void Return(UnityEngine.GameObject gameObject)
+        public void Return(GameObject gameObject)
         {
             if (!gameObject)
                 return;
-            if (_prefabToAssetReference.TryGetValue(gameObject.GetInstanceID(), out var assetReference))
-                Return(assetReference, gameObject);
+            if (_dicTrackingInstancePools.TryGetValue(gameObject.GetInstanceID(), out var pool))
+                pool.Return(gameObject);
             else
-                Debug.LogError($"GameObject {gameObject.name} is not registered in the pool or was already returned.");
+                Debug.LogWarning($"GameObject {gameObject.name} is not registered in the pool or was already returned.");
         }
 
-        public void Return(AssetRefGameObjectPrefab gameObjectReference, UnityEngine.GameObject gameObject)
+        public void Return(AssetRefGameObjectPrefab gameObjectReference, GameObject gameObject)
         {
             if (_pools.TryGetValue(gameObjectReference, out var pool))
                 pool.Return(gameObject);
         }
 
-        public void ReleaseInstances(int keep, System.Action<UnityEngine.GameObject> onReleased = null)
+        public void ReleaseInstances(int keep, System.Action<GameObject> onReleased = null)
         {
             foreach (var pool in _pools.Values)
                 pool.ReleaseInstances(keep, onReleased);
         }
 
-        private void OnReturnToPool(UnityEngine.GameObject gameObject) => _prefabToAssetReference.Remove(gameObject.GetInstanceID());
+        private void OnReturnToPool(GameObject gameObject) => _dicTrackingInstancePools.Remove(gameObject.GetInstanceID());
 
+        public void Dispose()
+        {
+            foreach (var pool in _pools.Values)
+                pool.Dispose();
+            _pools.Clear();
+            _dicTrackingInstancePools.Clear();
+            _poolKeyCache.Clear();
+        }
+        
         private class AssetRefGameObjectPrefabEqualityComparer : IEqualityComparer<AssetRefGameObjectPrefab>
         {
             public bool Equals([NotNull] AssetRefGameObjectPrefab x, [NotNull] AssetRefGameObjectPrefab y)
                 => y is { Source: not null } && x is { Source: not null } &&
                    x.Source.AssetGUID.Equals(y.Source.AssetGUID);
             public int GetHashCode(AssetRefGameObjectPrefab obj) => obj.Source.AssetGUID.GetHashCode();
-        }
-        
-        public void Dispose()
-        {
-            foreach (var pool in _pools.Values)
-                pool.Dispose();
-            _pools.Clear();
-            _prefabToAssetReference.Clear();
-            _poolKeyCache.Clear();
         }
     }
 }

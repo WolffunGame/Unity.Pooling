@@ -4,15 +4,15 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using ZBase.Foundation.Pooling.UnityPools;
 
-namespace ZBase.Foundation.Pooling.GameObject.LazyPool
+namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
 {
     public class GlobalGameObjectPool : IPool, IShareable
     {
         private readonly Dictionary<int, GameObjectItemPool> _pools = new();
-        private readonly Dictionary<int, GameObjectPrefab> _prefabToAssetReference = new();
+        private readonly Dictionary<int, GameObjectItemPool> _dicTrackingInstancePools = new();
         private readonly Dictionary<int, GameObjectPrefab> _poolKeyCache = new();
 
-        public async UniTask<UnityEngine.GameObject> Rent(UnityEngine.GameObject gameObjectReference)
+        public async UniTask<GameObject> Rent(GameObject gameObjectReference)
         {
             var hash = gameObjectReference.GetInstanceID();
             if (!_poolKeyCache.TryGetValue(hash, out var key))
@@ -20,7 +20,7 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
             return await Rent(key);
         }
 
-        public async UniTask<UnityEngine.GameObject> Rent(GameObjectPrefab gameObjectReference)
+        public async UniTask<GameObject> Rent(GameObjectPrefab gameObjectReference)
         {
             var instanceID = gameObjectReference.Source.GetInstanceID();
             if (!_pools.TryGetValue(instanceID, out var pool))
@@ -29,44 +29,78 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
                     throw new Exception($"Non Prefab not supported {gameObjectReference.Source.name}");
                 pool = new GameObjectItemPool(gameObjectReference);
                 pool.OnReturn += OnReturnToPool;
+                pool.OnPoolEmpty += OnPoolEmpty;
                 this._pools.Add(instanceID, pool);
             }
 
-            UnityEngine.GameObject item = await pool.Rent();
-            _prefabToAssetReference.Add(item.GetInstanceID(), gameObjectReference);
+            GameObject item = await pool.Rent();
+            this._dicTrackingInstancePools.Add(item.GetInstanceID(), pool);
             return item;
         }
 
-        public void Return(UnityEngine.GameObject gameObject)
+        public void Return(GameObject gameObject)
         {
             if (!gameObject)
                 return;
-            if (_prefabToAssetReference.TryGetValue(gameObject.GetInstanceID(), out var assetReference))
-                Return(assetReference, gameObject);
+            if (this._dicTrackingInstancePools.TryGetValue(gameObject.GetInstanceID(), out var pool))
+                pool.Return(gameObject);
             else
-                Debug.LogWarning($"GameObject {gameObject.name} is not registered in the pool or was already returned.");
+                Debug.LogWarning(
+                    $"GameObject {gameObject.name} is not registered in the pool or was already returned.");
         }
 
-        public void Return(GameObjectPrefab gameObjectReference, UnityEngine.GameObject gameObject)
+        public void Return(GameObjectPrefab gameObjectReference, GameObject gameObject)
         {
             if (_pools.TryGetValue(gameObjectReference.Source.GetInstanceID(), out var pool))
                 pool.Return(gameObject);
         }
 
-        public void ReleaseInstances(int keep, Action<UnityEngine.GameObject> onReleased = null)
+        public void ReleaseInstances(int keep, Action<GameObject> onReleased = null)
         {
             foreach (var pool in _pools.Values)
                 pool.ReleaseInstances(keep, onReleased);
         }
 
-        private void OnReturnToPool(UnityEngine.GameObject gameObject) => _prefabToAssetReference.Remove(gameObject.GetInstanceID());
+        private void OnPoolEmpty(GameObjectItemPool pool)
+        {
+            pool.Dispose();
+            this._pools.Remove(pool.ID);
+            RemoveReference(pool.ID);
+            RemoveCacheKey(pool.ID);
+        }
         
+        private void RemoveReference(int poolID)
+        {
+            foreach (var keyPair in this._dicTrackingInstancePools)
+            {
+                if (keyPair.Value.ID != poolID)
+                    continue;
+                this._dicTrackingInstancePools.Remove(keyPair.Key);
+                Debug.LogWarning($"Pool {poolID} is empty and removed from tracking");
+                break;
+            }
+        }
+   
+        private void RemoveCacheKey(int poolID)
+        {
+            foreach (var keyPair in  _poolKeyCache)
+            {
+                if (keyPair.Value.Source.GetInstanceID() != poolID)
+                    continue;
+                this._poolKeyCache.Remove(keyPair.Key);
+                break;
+            }
+        }
+
+        private void OnReturnToPool(GameObject gameObject) =>
+            this._dicTrackingInstancePools.Remove(gameObject.GetInstanceID());
+
         public void Dispose()
         {
             foreach (var pool in _pools.Values)
                 pool.Dispose();
             _pools.Clear();
-            _prefabToAssetReference.Clear();
+            _dicTrackingInstancePools.Clear();
             _poolKeyCache.Clear();
         }
     }

@@ -4,7 +4,7 @@ using UnityEngine;
 using ZBase.Foundation.Pooling.UnityPools;
 using Object = UnityEngine.Object;
 
-namespace ZBase.Foundation.Pooling.GameObject.LazyPool
+namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
 {
     public class PoolItem<T, TPrefab> : MonoBehaviour where T : Object where TPrefab : IPrefab<T>
     {
@@ -42,7 +42,7 @@ namespace ZBase.Foundation.Pooling.GameObject.LazyPool
             _prefab = prefab;
         }
 
-        private void OnDestroy()
+        protected virtual void OnDestroy()
         {
             _pool?.RemoveItem(_instance);
             _prefab?.Release(_instance);

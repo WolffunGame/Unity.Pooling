@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ZBase.Foundation.Pooling.GameObject.LazyPool
+namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
 {
     public class PoolItemAutoDeSpawnSetUp : MonoBehaviour
     {

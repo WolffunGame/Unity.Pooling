@@ -15,6 +15,16 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
         private readonly Dictionary<int, AssetRefGameObjectItemPool> _dicTrackingInstancePools = new();
 
         private readonly Dictionary<AssetReferenceGameObject, AssetRefGameObjectPrefab> _poolKeyCache = new();
+        private readonly Dictionary<string, AssetRefGameObjectPrefab> _poolStringKeyCache = new();
+        
+        public async UniTask<GameObject> Rent(string address)
+        {
+            if (_poolStringKeyCache.TryGetValue(address, out var key))
+                return await Rent(key);
+            var assetRef = new AssetReferenceGameObject(address);
+            this._poolStringKeyCache.Add(address, key = new AssetRefGameObjectPrefab { Source = assetRef, });
+            return await Rent(key);
+        }
 
         public async UniTask<GameObject> Rent(AssetReferenceGameObject gameObjectReference)
         {
@@ -68,6 +78,7 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
             _pools.Clear();
             _dicTrackingInstancePools.Clear();
             _poolKeyCache.Clear();
+            _poolStringKeyCache.Clear();
         }
         
         private class AssetRefGameObjectPrefabEqualityComparer : IEqualityComparer<AssetRefGameObjectPrefab>

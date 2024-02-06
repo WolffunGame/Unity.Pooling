@@ -44,7 +44,7 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
 
         protected virtual void OnDestroy()
         {
-            _pool?.RemoveItem(_instance);
+            _pool?.OnPoolItemDestroy(_instance);
             _prefab?.Release(_instance);
         }
     }

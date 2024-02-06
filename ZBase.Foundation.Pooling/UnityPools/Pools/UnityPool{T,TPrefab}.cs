@@ -90,7 +90,7 @@ namespace ZBase.Foundation.Pooling.UnityPools
             _queue.TryEnqueue(instance.GetInstanceID(), instance);
         }
         
-        public void RemoveItem(T instance)
+        public void OnPoolItemDestroy(T instance)
         {
             if (!instance)
                 return;

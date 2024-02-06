@@ -96,6 +96,7 @@ namespace ZBase.Foundation.Pooling.UnityPools
                 return;
             ReturnPreprocess(instance);
             _queue.Remove(instance.GetInstanceID());
+            _prefab.Release(instance);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

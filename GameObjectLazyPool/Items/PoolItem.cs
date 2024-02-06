@@ -9,7 +9,6 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
     public class PoolItem<TPrefab> : MonoBehaviour where TPrefab : IPrefab<GameObject>
     {
         private float _lifeTime;
-        private TPrefab _prefab;
         private UnityPool<GameObject, TPrefab> _pool;
 
         private void Awake()
@@ -37,16 +36,8 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
             _pool?.Return(gameObject);
         }
 
-        public void SetUp(UnityPool<GameObject, TPrefab> pool, TPrefab prefab)
-        {
-            _pool = pool;
-            _prefab = prefab;
-        }
+        public void SetUp(UnityPool<GameObject, TPrefab> pool) => _pool = pool;
 
-        protected virtual void OnDestroy()
-        {
-            _pool?.OnPoolItemDestroy(gameObject);
-            _prefab?.Release(gameObject);
-        }
+        protected virtual void OnDestroy() => _pool?.OnPoolItemDestroy(gameObject);
     }
 }

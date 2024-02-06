@@ -8,6 +8,7 @@ namespace ZBase.Foundation.Pooling.UnityPools
     public class GameObjectPool<TPrefab> : UnityPool<GameObject, TPrefab> where TPrefab : IPrefab<GameObject>
     {
         [SerializeField] private bool _dontApplyPrefabParentOnReturn;
+        public event Action<GameObject> OnReturnAction;
 
         public GameObjectPool()
         {
@@ -34,6 +35,7 @@ namespace ZBase.Foundation.Pooling.UnityPools
             instance.SetActive(false);
             if (_dontApplyPrefabParentOnReturn == false && Prefab != null)
                 instance.transform.SetParent(Prefab.Parent);
+            OnReturnAction?.Invoke(instance);
         }
     }
 }

@@ -7,7 +7,6 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
 {
     public sealed class GameObjectItemPool : GameObjectPool
     {
-        internal event Action<GameObject> OnReturn;
         internal event Action<GameObjectItemPool> OnPoolEmpty;
         private readonly List<int > _poolItems = new();
 
@@ -30,12 +29,6 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
             this._poolItems.Remove(instance.GetInstanceID());
             if(this._poolItems.Count == 0)
                 OnPoolEmpty?.Invoke(this);
-        }
-        
-        protected override void ReturnPreprocess(GameObject instance)
-        {
-            base.ReturnPreprocess(instance);
-            OnReturn?.Invoke(instance);
         }
     }
 }

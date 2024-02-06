@@ -10,6 +10,8 @@ namespace ZBase.Foundation.Pooling.UnityPools
     public class UnityPool<T, TPrefab>
         : IUnityPool<T, TPrefab>, IShareable, IDisposable where T : UnityEngine.Object where TPrefab : IPrefab<T>
     {
+        public event Action<T> OnItemDestroyAction;
+        
         private readonly UniqueQueue<int, T> _queue;
 
         [SerializeField] private TPrefab _prefab;
@@ -90,13 +92,13 @@ namespace ZBase.Foundation.Pooling.UnityPools
             _queue.TryEnqueue(instance.GetInstanceID(), instance);
         }
         
-        public void OnPoolItemDestroy(T instance)
+        public virtual void OnPoolItemDestroy(T instance)
         {
             if (!instance)
                 return;
-            ReturnPreprocess(instance);
             _queue.Remove(instance.GetInstanceID());
             _prefab.Release(instance);
+            OnItemDestroyAction?.Invoke(instance);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

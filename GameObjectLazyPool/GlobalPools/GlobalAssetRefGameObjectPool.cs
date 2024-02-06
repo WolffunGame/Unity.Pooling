@@ -39,7 +39,8 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
             if (!_pools.TryGetValue(gameObjectReference, out var pool))
             {
                 pool = new AssetRefGameObjectItemPool(gameObjectReference);
-                pool.OnReturn += OnReturnToPool;
+                pool.OnItemDestroyAction += RemoveTrackingItem;
+                pool.OnReturnAction += RemoveTrackingItem;
                 this._pools.Add(gameObjectReference, pool);
             }
             GameObject item = await pool.Rent();
@@ -69,7 +70,7 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
                 pool.ReleaseInstances(keep, onReleased);
         }
 
-        private void OnReturnToPool(GameObject gameObject) => _dicTrackingInstancePools.Remove(gameObject.GetInstanceID());
+        private void RemoveTrackingItem(GameObject gameObject) => _dicTrackingInstancePools.Remove(gameObject.GetInstanceID());
 
         public void Dispose()
         {

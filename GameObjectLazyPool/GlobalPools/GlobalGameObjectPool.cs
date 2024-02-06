@@ -28,7 +28,8 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
                 if (gameObjectReference.Source.scene.IsValid())
                     throw new Exception($"Non Prefab not supported {gameObjectReference.Source.name}");
                 pool = new GameObjectItemPool(gameObjectReference);
-                pool.OnReturn += OnReturnToPool;
+                pool.OnReturnAction += RemoveTrackingItem;
+                pool.OnItemDestroyAction += RemoveTrackingItem;
                 pool.OnPoolEmpty += OnPoolEmpty;
                 this._pools.Add(instanceID, pool);
             }
@@ -92,7 +93,7 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
             }
         }
 
-        private void OnReturnToPool(GameObject gameObject) =>
+        private void RemoveTrackingItem(GameObject gameObject) =>
             this._dicTrackingInstancePools.Remove(gameObject.GetInstanceID());
 
         public void Dispose()

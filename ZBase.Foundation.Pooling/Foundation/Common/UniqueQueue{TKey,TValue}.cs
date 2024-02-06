@@ -53,7 +53,7 @@ namespace ZBase.Foundation.Pooling
             return false;
         }
 
-        public void Remove(TKey key) => this._unique.Remove(key, out _);
+        internal void Remove(TKey key) => this._unique.Remove(key, out _);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Contains(TKey key)

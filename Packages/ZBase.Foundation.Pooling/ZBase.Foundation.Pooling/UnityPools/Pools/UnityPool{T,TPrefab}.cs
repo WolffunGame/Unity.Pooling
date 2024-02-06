@@ -8,19 +8,15 @@ namespace ZBase.Foundation.Pooling.UnityPools
 {
     [Serializable]
     public class UnityPool<T, TPrefab>
-        : IUnityPool<T, TPrefab>, IShareable, IDisposable
-        where T : UnityEngine.Object
-        where TPrefab : IPrefab<T>
+        : IUnityPool<T, TPrefab>, IShareable, IDisposable where T : UnityEngine.Object where TPrefab : IPrefab<T>
     {
+        public event Action<T> OnItemDestroyAction;
+        
         private readonly UniqueQueue<int, T> _queue;
 
-        [SerializeField]
-        private TPrefab _prefab;
+        [SerializeField] private TPrefab _prefab;
 
-        public UnityPool()
-        {
-            _queue = new UniqueQueue<int, T>();
-        }
+        public UnityPool() => _queue = new UniqueQueue<int, T>();
 
         public UnityPool(TPrefab prefab)
         {
@@ -28,10 +24,7 @@ namespace ZBase.Foundation.Pooling.UnityPools
             _prefab = prefab ?? throw new ArgumentNullException(nameof(prefab));
         }
 
-        public UnityPool(UniqueQueue<int, T> queue)
-        {
-            _queue = queue ?? throw new ArgumentNullException(nameof(queue));
-        }
+        public UnityPool(UniqueQueue<int, T> queue) => _queue = queue ?? throw new ArgumentNullException(nameof(queue));
 
         public UnityPool(UniqueQueue<int, T> queue, TPrefab prefab)
         {
@@ -51,19 +44,15 @@ namespace ZBase.Foundation.Pooling.UnityPools
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Count() => _queue.Count;
 
-        public void Dispose()
-        {
-            _queue.Dispose();
-        }
+        public void Dispose() => _queue.Dispose();
 
         /// <inheritdoc/>
         public void ReleaseInstances(int keep, Action<T> onReleased = null)
         {
             var countRemove = _queue.Count - keep;
-
             while (countRemove > 0)
             {
-                if (_queue.TryDequeue(out var _, out var instance))
+                if (_queue.TryDequeue(out var instance))
                 {
                     if (onReleased != null)
                         onReleased(instance);
@@ -77,27 +66,39 @@ namespace ZBase.Foundation.Pooling.UnityPools
 
         public async UniTask<T> Rent()
         {
-            if (_queue.TryDequeue(out var _, out var instance))
+            if (_queue.TryDequeue(out var instance))
                 return instance;
-
-            return await _prefab.Instantiate();
+            instance = await _prefab.Instantiate();
+            ProcessNewInstance(instance);
+            return instance;
         }
 
         public async UniTask<T> Rent(CancellationToken cancelToken)
         {
-            if (_queue.TryDequeue(out var _, out var instance))
+            if (_queue.TryDequeue(out var instance))
                 return instance;
-
-            return await _prefab.Instantiate(cancelToken);
+            instance = await _prefab.Instantiate(cancelToken);
+            ProcessNewInstance(instance);
+            return instance;
         }
+
+        protected virtual void ProcessNewInstance(T instance) { }
 
         public void Return(T instance)
         {
-            if (instance == false)
+            if (!instance)
                 return;
-
             ReturnPreprocess(instance);
             _queue.TryEnqueue(instance.GetInstanceID(), instance);
+        }
+        
+        public virtual void OnPoolItemDestroy(T instance)
+        {
+            if (!instance)
+                return;
+            _queue.Remove(instance.GetInstanceID());
+            _prefab.Release(instance);
+            OnItemDestroyAction?.Invoke(instance);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -5,13 +5,13 @@ using ZBase.Foundation.Pooling.UnityPools;
 
 namespace ZBase.Foundation.Pooling.ScriptablePools
 {
-    public struct UnityObjectPrepooler
-        : IPrepooler<Object
+    public struct UnityObjectPrePool
+        : IPrePool<Object
             , UnityObjectPrefab
             , IReturnable<Object>
         >
     {
-        public async UniTask Prepool(
+        public async UniTask PrePool(
               UnityObjectPrefab prefab
             , IReturnable<Object> pool
             , Transform defaultParent
@@ -24,13 +24,13 @@ namespace ZBase.Foundation.Pooling.ScriptablePools
             if (pool == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.pool);
 
-            if (prefab.PrepoolAmount <= 0)
+            if (prefab.PrePoolAmount <= 0)
                 return;
 
             if (prefab.Parent == false && defaultParent)
                 prefab.Parent = defaultParent;
 
-            for (int i = 0, count = prefab.PrepoolAmount; i < count; i++)
+            for (int i = 0, count = prefab.PrePoolAmount; i < count; i++)
             {
                 var instance = await prefab.Instantiate(cancelToken);
                 pool.Return(instance);

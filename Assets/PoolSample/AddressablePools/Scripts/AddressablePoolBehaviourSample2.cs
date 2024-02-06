@@ -24,8 +24,8 @@ namespace Pooling.Sample
     {
         [SerializeField] private AssetRefGameObjectPoolBehaviour pool;
 
-        private List<GameObject> _spawned = new List<GameObject>();
-        private List<Vector3> _slots = new List<Vector3>();
+        private readonly List<GameObject> _spawned = new();
+        private readonly List<Vector3> _slots = new();
 
         private void Start()
         {
@@ -45,12 +45,8 @@ namespace Pooling.Sample
         private async void OnGUI()
         {
             if(GUI.Button(new Rect(10, 10, 150, 50), "Spawn 100"))
-            {
                 for (int i = 0; i < 100; i++)
-                {
                     await Spawn();
-                }
-            }
             
             if(GUI.Button(new Rect(10, 70, 150, 50), "Despawn 10"))
             {
@@ -59,9 +55,7 @@ namespace Pooling.Sample
             }
             
             if(GUI.Button(new Rect(10, 130, 150, 50), "Release Keep 10"))
-            {
                 Release();
-            }
         }
 
         private async UniTask Spawn()
@@ -74,23 +68,18 @@ namespace Pooling.Sample
         
         private void Despawn(ref int count)
         {
-            //despawn count last spawned active
             for (int i = this._spawned.Count - 1; i >= 0; i--)
             {
-                if(this._spawned[i].activeSelf)
-                {
-                    this.pool.Return(this._spawned[i]);
-                    count--;
-                    if(count == 0)
-                        break;
-                }
+                if (!this._spawned[i].activeSelf)
+                    continue;
+                this.pool.Return(this._spawned[i]);
+                count--;
+                if(count == 0)
+                    break;
             }
         }
-        
-        private void Release()
-        {
-            this.pool.ReleaseInstances(10);
-        }
+
+        private void Release() => this.pool.ReleaseInstances(10);
 
         private void OnDestroy()
         {

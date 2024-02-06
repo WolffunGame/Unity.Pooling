@@ -11,7 +11,8 @@
         "ZBase.Collections.Pooled",
         "ZBase.Foundation.Pooling",
         "ZBase.Foundation.Pooling.Addressables",
-        "Sample.Environment"
+        "Sample.Environment",
+        "ItemPooling"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

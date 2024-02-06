@@ -21,14 +21,12 @@ MonoBehaviour:
     m_Address: Character_P01
     m_ReadOnly: 0
     m_SerializedLabels: []
-  - m_GUID: 1c14710c0d49c480497e5be810eb4fc4
-    m_Address: Character_AddressPool_P01
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d0d1d00d6013742259b0519a178bae7e
+    m_Address: AddressGameObjectPool_2
     m_ReadOnly: 0
     m_SerializedLabels: []
-  - m_GUID: 5fa68afe6708644fda728daf092224b3
-    m_Address: Character_AddressPool_P02
-    m_ReadOnly: 0
-    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: e0f6fa325fd1a464cbecb4e3b9f30872, type: 2}
   m_SchemaSet:

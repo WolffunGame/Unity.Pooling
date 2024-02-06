@@ -1,8 +1,6 @@
-using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Serialization;
 using ZBase.Collections.Pooled.Generic;
 using ZBase.Foundation.Pooling;
 
@@ -25,30 +23,13 @@ namespace Pooling.Sample
     {
         [SerializeField] private AddressableColliderPoolBehaviour pool;
 
-        private readonly List<BoxCollider> _units = new List<BoxCollider>();
+        private readonly List<BoxCollider> _units = new();
 
-        private async void Start()
-        {
-            await this.pool.Prepool(gameObject.GetCancellationTokenOnDestroy());
-        }
-
-        private async void OnGUI()
-        {
-            if(GUI.Button(new Rect(0, 0, 150, 50), "Rent All"))
-            {
-                await Rent(gameObject.GetCancellationTokenOnDestroy());
-            }
-
-            if (GUI.Button(new Rect(0, 100, 150, 50), "Return All"))
-            {
-                this.pool.Return(this._units);
-            }
-        }
+        private async void Start() => await this.pool.Prepool(this.GetCancellationTokenOnDestroy()).SuppressCancellationThrow();
 
         // ReSharper disable Unity.PerformanceAnalysis
         private async UniTask Rent(CancellationToken cancelToken = default)
         {
-            //fill units in range (-30,0,-15) to (30,0,15) sequentially, each unit is 1x1x1
             for (int x = -20; x < 20; x++)
             {
                 if(x % 2 == 0)
@@ -62,6 +43,19 @@ namespace Pooling.Sample
                     unit.gameObject.SetActive(true);
                     this._units.Add(unit);
                 }
+            }
+        }
+        
+        private async void OnGUI()
+        {
+            if(GUI.Button(new Rect(0, 0, 150, 50), "Rent All"))
+            {
+                await Rent(gameObject.GetCancellationTokenOnDestroy());
+            }
+
+            if (GUI.Button(new Rect(0, 100, 150, 50), "Return All"))
+            {
+                this.pool.Return(this._units);
             }
         }
     }

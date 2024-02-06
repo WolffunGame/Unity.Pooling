@@ -1,6 +1,5 @@
-using System.Runtime.CompilerServices;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
-using ZBase.Foundation.Pooling;
 using ZBase.Foundation.Pooling.UnityPools;
 
 namespace Pooling.Sample
@@ -10,31 +9,8 @@ namespace Pooling.Sample
     /// </summary>
     public class CustomGameObjectPool : GameObjectPool
     {
-        private readonly UnityPrepooler<GameObject, GameObjectPrefab, GameObjectPool> _prepooler;
-        
-        public CustomGameObjectPool() : base()
-        {
-            _prepooler = new UnityPrepooler<GameObject, GameObjectPrefab, GameObjectPool>();
-        }
-        
-        public CustomGameObjectPool(GameObjectPrefab prefab) : base(prefab)
-        {
-            _prepooler = new UnityPrepooler<GameObject, GameObjectPrefab, GameObjectPool>();
-        }
-        
-        public CustomGameObjectPool(UniqueQueue<int, GameObject> queue) : base(queue)
-        {
-            _prepooler = new UnityPrepooler<GameObject, GameObjectPrefab, GameObjectPool>();
-        }
-        
-        public CustomGameObjectPool(UniqueQueue<int, GameObject> queue, GameObjectPrefab prefab) : base(queue, prefab)
-        {
-            _prepooler = new UnityPrepooler<GameObject, GameObjectPrefab, GameObjectPool>();
-        }
+        private readonly UnityPrePool<GameObject, GameObjectPrefab, GameObjectPool> _prePool = new();
 
-        public void Prepool()
-        {
-            _prepooler.Prepool(Prefab, this, Prefab.Parent);
-        }
+        public void PrePool() => this._prePool.PrePool(Prefab, this, Prefab.Parent).Forget();
     }
 }

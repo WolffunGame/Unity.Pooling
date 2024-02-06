@@ -12,22 +12,23 @@ namespace Pooling.Sample
         private const string K_CHARACTER02_KEY = "Character_AddressPool_P02";
 
         private Grid _grid = new Grid(20, 15, true);
-        private List<GameObject> _spawned = new List<GameObject>();
-        private void Start()
+        private List<GameObject> _spawned = new ();
+        private async UniTask OnStart()
         {
             var pool = SharedPool.Of<CustomAddressGameObjectPool>();
             pool.Prefab = new AddressGameObjectPrefab {
                 Source = K_CHARACTER02_KEY,
                 Parent = transform,
-                PrepoolAmount = 100
+                PrePoolAmount = 100
             };
-            pool.Prepool().Forget();
+            await pool.Prepool();
         }
 
         private async void OnGUI()
         {
             if (GUI.Button(new Rect(10, 10, 150, 50), "Spawn"))
             {
+                await OnStart();
                 for (int i = 0; i < 100; i++)
                 {
                     Spawn().Forget();
@@ -56,7 +57,7 @@ namespace Pooling.Sample
         
         private async UniTask Spawn()
         {
-            var pool = SharedPool.Of<AddressGameObjectPool>();
+            var pool = SharedPool.Of<CustomAddressGameObjectPool>();
             var go = await pool.Rent();
             go.transform.position = _grid.GetAvailableSlot().position;
             go.SetActive(true);
@@ -65,7 +66,7 @@ namespace Pooling.Sample
 
         private void Return()
         {
-            var pool = SharedPool.Of<AddressGameObjectPool>();
+            var pool = SharedPool.Of<CustomAddressGameObjectPool>();
             foreach (var go in _spawned)
             {
                 pool.Return(go);
@@ -75,7 +76,7 @@ namespace Pooling.Sample
         
         private async UniTask SpawnDisposableItems()
         {
-            var pool = SharedPool.Of<AddressGameObjectPool>();
+            var pool = SharedPool.Of<CustomAddressGameObjectPool>();
             var context = pool.DisposableContext();
             using var go = await context.Rent();
             go.Instance.transform.position = _grid.GetAvailableSlot().position;
@@ -86,7 +87,7 @@ namespace Pooling.Sample
         
         private void ReleaseAll()
         {
-            var pool = SharedPool.Of<AddressGameObjectPool>();
+            var pool = SharedPool.Of<CustomAddressGameObjectPool>();
             pool.ReleaseInstances(0);
             _spawned.Clear();
         }

@@ -28,7 +28,7 @@ namespace ZBase.Foundation.Pooling.ScriptablePools
             set => _source = value;
         }
 
-        public int PrepoolAmount
+        public int PrePoolAmount
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _prepoolAmount;

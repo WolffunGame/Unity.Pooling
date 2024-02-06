@@ -59,7 +59,7 @@ namespace Pooling.Sample
             Debug.Log(foo.Name);
         
             var gameObjectPrefab = new GameObjectPrefab() {
-                Parent = this.transform, PrepoolAmount = 40, Source = this.prefab
+                Parent = this.transform, PrePoolAmount = 40, Source = this.prefab
             };
             _gameObjectPool = new GameObjectPool(gameObjectPrefab);
         

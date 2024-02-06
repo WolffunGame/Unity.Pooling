@@ -9,7 +9,6 @@ namespace ZBase.Foundation.Pooling
             => TryEnqueue(item, item);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryDequeue(out T item)
-            => TryDequeue(out var _, out item);
+        public bool TryDequeue(out T item) => base.TryDequeue(out item);
     }
 }

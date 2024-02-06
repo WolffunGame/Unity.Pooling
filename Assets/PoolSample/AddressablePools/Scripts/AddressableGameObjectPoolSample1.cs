@@ -1,98 +1,75 @@
-using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using ZBase.Collections.Pooled.Generic;
-using ZBase.Foundation.Pooling;
 using ZBase.Foundation.Pooling.AddressableAssets;
-using Grid = Sample.Environment.Grid;
+using ZBase.Foundation.Pooling.GameObjectItem.LazyPool.Extensions;
 
 namespace Pooling.Sample
 {
     public class AddressableGameObjectPoolSample1 : MonoBehaviour
     {
-        private const string K_CHARACTER01_KEY = "Character_AddressPool_P01";
+        [SerializeField] private AssetRefGameObjectPrefab _prefab;
+        [SerializeField] private AssetReferenceGameObject _assetReferenceGameObject;
 
-        private Grid _grid = new Grid(20, 15, true);
-        private List<GameObject> _spawned = new List<GameObject>();
-        private void Start()
-        {
-            var pool = SharedPool.Of<AddressGameObjectPool>();
-            pool.Prefab = new AddressGameObjectPrefab {
-                Source = K_CHARACTER01_KEY,
-                Parent = transform
-            };
-        }
+        private GameObject _item;
 
-        private async void OnGUI()
-        {
-            if (GUI.Button(new Rect(10, 10, 150, 50), "Spawn"))
-            {
-                for (int i = 0; i < 100; i++)
-                {
-                    Spawn().Forget();
-                }
-                Debug.Log("Spawn 100 item from the AddressableGameObject pool");
-            }
-            
-            if (GUI.Button(new Rect(10, 70, 150, 50), "Spawn Disposable Item"))
-            {
-                await SpawnDisposableItems();
-                Debug.Log("Item automatically returned to pool when context is disposed");
-            }
-            
-            if (GUI.Button(new Rect(10, 130, 150, 50), "Return"))
-            {
-                Return();
-                Debug.Log("Return all item to the pool");
-            }
-            
-            if (GUI.Button(new Rect(10, 190, 150, 50), "Release All"))
-            {
-                ReleaseAll();
-                Debug.Log("Release all item from the pool");
-            }
-        }
-        
         private async UniTask Spawn()
         {
-            var pool = SharedPool.Of<AddressGameObjectPool>();
-            var go = await pool.Rent();
-            go.transform.position = _grid.GetAvailableSlot().position;
-            go.SetActive(true);
-            _spawned.Add(go);
-        }
+            _item = await LazyAssetRefGameObjectPool.Rent(_prefab);
+            _item.SetActive(true);
+            var pos = Random.insideUnitCircle * _spawnRadius;
+            _item.transform.position = new Vector3 {x = pos.x, y = 0, z = pos.y};
+            _spawned.Add(_item);
+        } 
+        
+        private async UniTask SpawnByRef()
+        {
+            _item = await LazyAssetRefGameObjectPool.Rent(_assetReferenceGameObject);
+            _item.SetActive(true);
+            var pos = Random.insideUnitCircle * _spawnRadius;
+            _item.transform.position = new Vector3 {x = pos.x, y = 0, z = pos.y};
+            _spawned.Add(_item);
+        } 
+        
+        private void DeSpawn() => LazyAssetRefGameObjectPool.Return(_item);
 
         private void Return()
         {
-            var pool = SharedPool.Of<AddressGameObjectPool>();
             foreach (var go in _spawned)
             {
-                pool.Return(go);
-                this._grid.FreeSlot(go.transform.position);
+                go.SetActive(false);
+                LazyAssetRefGameObjectPool.Return(go);
             }
-        }
-        
-        private async UniTask SpawnDisposableItems()
-        {
-            var pool = SharedPool.Of<AddressGameObjectPool>();
-            var context = pool.DisposableContext();
-            using var go = await context.Rent();
-            go.Instance.transform.position = _grid.GetAvailableSlot().position;
-            go.Instance.SetActive(true);
-            _spawned.Add(go.Instance);
-            await UniTask.Delay(1500);
-        }
-        
-        private void ReleaseAll()
-        {
-            var pool = SharedPool.Of<AddressGameObjectPool>();
-            pool.ReleaseInstances(0);
             _spawned.Clear();
         }
-        
-        private void OnDisable()
+
+        private void ReleaseAll()
         {
-            ReleaseAll();
+            foreach (var go in _spawned)
+                go.SetActive(false);
+            LazyAssetRefGameObjectPool.ReleaseInstances(0);
+            _spawned.Clear();
         }
+
+        private void OnGUI()
+        {
+            if (GUI.Button(new Rect(10, 10, 150, 50), "Spawn"))
+                for (int i = 0; i < _spawnCount; i++)
+                    Spawn().Forget();
+            if (GUI.Button(new Rect(10, 70, 150, 50), "Return"))
+                Return();
+            if (GUI.Button(new Rect(10, 130, 150, 50), "Release All"))
+                ReleaseAll();
+            if (GUI.Button(new Rect(10, 190, 150, 50), "Load By AssetRef"))
+                for (int i = 0; i < this._spawnCount; i++)
+                    SpawnByRef().Forget();
+            if (GUI.Button(new Rect(10, 250, 150, 50), "Switch Scene"))
+                Addressables.LoadSceneAsync(_sceneRef);
+        }
+        [SerializeField] private AssetReference _sceneRef;
+        [SerializeField] private float _spawnRadius = 20f;
+        [SerializeField] private int _spawnCount = 20;
+        private readonly List<GameObject> _spawned = new();
     }
 }

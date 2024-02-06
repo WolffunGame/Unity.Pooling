@@ -5,28 +5,21 @@ using UnityEngine;
 namespace ZBase.Foundation.Pooling.UnityPools
 {
     [Serializable]
-    public class ComponentPool<T, TPrefab>
-        : UnityPool<T, TPrefab>
-        where T : UnityEngine.Component
-        where TPrefab : IPrefab<T>
+    public class ComponentPool<T, TPrefab> : UnityPool<T, TPrefab> where T : Component where TPrefab : IPrefab<T>
     {
         [SerializeField]
         private bool _dontApplyPrefabParentOnReturn;
 
         public ComponentPool()
-            : base()
         { }
 
-        public ComponentPool(TPrefab prefab)
-            : base(prefab)
+        public ComponentPool(TPrefab prefab) : base(prefab)
         { }
 
-        public ComponentPool(UniqueQueue<int, T> queue)
-            : base(queue)
+        public ComponentPool(UniqueQueue<int, T> queue) : base(queue)
         { }
 
-        public ComponentPool(UniqueQueue<int, T> queue, TPrefab prefab)
-            : base(queue, prefab)
+        public ComponentPool(UniqueQueue<int, T> queue, TPrefab prefab) : base(queue, prefab)
         { }
 
         public bool DontApplyPrefabParentOnReturn

@@ -17,8 +17,8 @@ namespace ZBase.Foundation.Pooling.ScriptablePools
         [SerializeField]
         private bool _prepoolOnStart = false;
 
-        private readonly UnityObjectPool _pool = new UnityObjectPool();
-        private readonly UnityObjectPrepooler _prepooler = default;
+        private readonly UnityObjectPool _pool = new();
+        private readonly UnityObjectPrePool _prePool = default;
 
         public bool PrepoolOnStart
         {
@@ -57,7 +57,7 @@ namespace ZBase.Foundation.Pooling.ScriptablePools
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public async UniTask Prepool(CancellationToken cancelToken)
-            => await _prepooler.Prepool(_prefab, _pool, Parent, cancelToken);
+            => await this._prePool.PrePool(_prefab, _pool, Parent, cancelToken);
 
         public void ReleaseInstances(int keep, Action<T> onReleased = null)
         {

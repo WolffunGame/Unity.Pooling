@@ -8,35 +8,35 @@ namespace Pooling.Sample
 {
     public class CustomAddressGameObjectPool : AddressGameObjectPool
     {
-        private readonly UnityPrepooler<GameObject, AddressGameObjectPrefab, AddressGameObjectPool> _prepooler;
+        private readonly UnityPrePool<GameObject, AddressGameObjectPrefab, AddressGameObjectPool> _prePool;
 
         public CustomAddressGameObjectPool()
             : base()
         {
-            _prepooler = new UnityPrepooler<GameObject, AddressGameObjectPrefab, AddressGameObjectPool>();
+            this._prePool = new UnityPrePool<GameObject, AddressGameObjectPrefab, AddressGameObjectPool>();
         }
 
         public CustomAddressGameObjectPool(AddressGameObjectPrefab prefab)
             : base(prefab)
         {
-            _prepooler = new UnityPrepooler<GameObject, AddressGameObjectPrefab, AddressGameObjectPool>();
+            this._prePool = new UnityPrePool<GameObject, AddressGameObjectPrefab, AddressGameObjectPool>();
         }
 
         public CustomAddressGameObjectPool(UniqueQueue<int, GameObject> queue)
             : base(queue)
         {
-            _prepooler = new UnityPrepooler<GameObject, AddressGameObjectPrefab, AddressGameObjectPool>();
+            this._prePool = new UnityPrePool<GameObject, AddressGameObjectPrefab, AddressGameObjectPool>();
         }
 
         public CustomAddressGameObjectPool(UniqueQueue<int, GameObject> queue, AddressGameObjectPrefab prefab)
             : base(queue, prefab)
         {
-            _prepooler = new UnityPrepooler<GameObject, AddressGameObjectPrefab, AddressGameObjectPool>();
+            this._prePool = new UnityPrePool<GameObject, AddressGameObjectPrefab, AddressGameObjectPool>();
         }
 
         public async UniTask Prepool()
         {
-            await _prepooler.Prepool(Prefab, this, Prefab.Parent);
+            await this._prePool.PrePool(Prefab, this, Prefab.Parent);
         }
     }
 }

@@ -8,22 +8,12 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 namespace ZBase.Foundation.Pooling.AddressableAssets
 {
     [Serializable]
-    public class AddressGameObjectPrefab
-        : AddressPrefab<GameObject>
+    public class AddressGameObjectPrefab : AddressPrefab<GameObject>
     {
         protected override async UniTask<GameObject> Instantiate(
-              string source
-            , Transform parent
-            , CancellationToken cancelToken
-        )
+            string source, Transform parent, CancellationToken cancelToken = default)
         {
-            AsyncOperationHandle<GameObject> handle;
-
-            if (parent)
-                handle = Addressables.InstantiateAsync(source, parent);
-            else
-                handle = Addressables.InstantiateAsync(source);
-
+            var handle = parent ? Addressables.InstantiateAsync(source, parent) : Addressables.InstantiateAsync(source);
             return await handle.WithCancellation(cancelToken);
         }
 

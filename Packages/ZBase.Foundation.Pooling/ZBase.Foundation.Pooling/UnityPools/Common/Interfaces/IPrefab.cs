@@ -2,6 +2,6 @@
 {
     public interface IPrefab
     {
-        int PrepoolAmount { get; set; }
+        int PrePoolAmount { get; set; }
     }
 }

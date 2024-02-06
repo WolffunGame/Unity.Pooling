@@ -38,26 +38,22 @@ namespace ZBase.Foundation.Pooling
         {
             if (key is null || value is null)
                 return false;
-
-            if (_unique.ContainsKey(key))
+            if (!this._unique.TryAdd(key, value))
                 return false;
-
-            _unique.Add(key, value);
             _queue.Enqueue(key);
             return true;
         }
 
-        public bool TryDequeue(out TKey key, out TValue value)
+        public bool TryDequeue(out TValue value)
         {
-            if (_queue.TryDequeue(out key) && _unique.TryGetValue(key, out value))
-            {
-                _unique.Remove(key);
-                return true;
-            }
-
             value = default;
+            while (_queue.Count > 0)
+                if (_queue.TryDequeue(out var key) && this._unique.Remove(key, out value) && value != null)
+                    return true;
             return false;
         }
+
+        internal void Remove(TKey key) => this._unique.Remove(key, out _);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Contains(TKey key)

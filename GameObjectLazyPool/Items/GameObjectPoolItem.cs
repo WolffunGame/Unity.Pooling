@@ -3,7 +3,7 @@ using UnityEngine;
 using ZBase.Foundation.Pooling.UnityPools;
 namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
 {
-    public class GameObjectPoolItem : PoolItem<GameObject, GameObjectPrefab>
+    public class GameObjectPoolItem : PoolItem<GameObjectPrefab>
     {
         public event Action<GameObject> OnItemDestroy;
         

@@ -17,7 +17,7 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
             base.ProcessNewInstance(instance);
             if (!instance.TryGetComponent<AssetRefGameObjectPoolItem>(out var poolItem))
                 poolItem = instance.AddComponent<AssetRefGameObjectPoolItem>();
-            poolItem.SetUp(this, instance, Prefab);
+            poolItem.SetUp(this, Prefab);
         }
 
         protected override void ReturnPreprocess(GameObject instance)

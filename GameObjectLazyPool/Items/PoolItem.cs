@@ -6,12 +6,11 @@ using Object = UnityEngine.Object;
 
 namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
 {
-    public class PoolItem<T, TPrefab> : MonoBehaviour where T : Object where TPrefab : IPrefab<T>
+    public class PoolItem<TPrefab> : MonoBehaviour where TPrefab : IPrefab<GameObject>
     {
         private float _lifeTime;
-        private T _instance;
         private TPrefab _prefab;
-        private UnityPool<T, TPrefab> _pool;
+        private UnityPool<GameObject, TPrefab> _pool;
 
         private void Awake()
         {
@@ -26,26 +25,28 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
                 return;
             StartDeSpawn().Forget();
         }
-        
+
         private async UniTask StartDeSpawn()
         {
             if (_lifeTime <= 0)
                 return;
-            await UniTask.Delay(TimeSpan.FromSeconds(_lifeTime), cancellationToken: this.GetCancellationTokenOnDestroy());
-            _pool?.Return(_instance);
+            if (await UniTask
+                    .Delay(TimeSpan.FromSeconds(_lifeTime), cancellationToken: this.GetCancellationTokenOnDestroy())
+                    .SuppressCancellationThrow())
+                return;
+            _pool?.Return(gameObject);
         }
 
-        public void SetUp(UnityPool<T, TPrefab> pool, T instance, TPrefab prefab)
+        public void SetUp(UnityPool<GameObject, TPrefab> pool, TPrefab prefab)
         {
-            _instance = instance;
             _pool = pool;
             _prefab = prefab;
         }
 
         protected virtual void OnDestroy()
         {
-            _pool?.OnPoolItemDestroy(_instance);
-            _prefab?.Release(_instance);
+            _pool?.OnPoolItemDestroy(gameObject);
+            _prefab?.Release(gameObject);
         }
     }
 }

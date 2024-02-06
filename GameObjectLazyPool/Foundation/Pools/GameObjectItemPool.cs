@@ -20,7 +20,7 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
             base.ProcessNewInstance(instance);
             if (!instance.TryGetComponent<GameObjectPoolItem>(out var poolItem))
                 poolItem = instance.AddComponent<GameObjectPoolItem>();
-            poolItem.SetUp(this, instance, Prefab);
+            poolItem.SetUp(this, Prefab);
             poolItem.OnItemDestroy += OnItemDestroy;
             this._poolItems.Add(instance.GetInstanceID());
         }

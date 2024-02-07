@@ -1,9 +1,9 @@
 {
   "name": "com.zbase.foundation.pooling",
   "displayName": "ZBase.Foundation.Pooling",
-  "version": "2.3.11",
+  "version": "2.3.10",
   "unity": "2021.3",
-  "documentationUrl": "https://github.com/Zitga-Tech/ZBase.Foundation.Pooling/blob/main/README.md",
+  "documentationUrl": "https://github.com/WolffunGame/Unity.Pooling/blob/main/README.md",
   "dependencies": {
     "com.cysharp.unitask": "2.3.3",
     "com.zbase.collections.pooled": "2.8.1"

@@ -14,14 +14,14 @@ namespace ZBase.Foundation.Pooling
         private static readonly Type s_type = typeof(T);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async UniTask<T> Instantiate()
+        public async UniTask<T> InstantiateAsync()
         {
             var result = (T)Activator.CreateInstance(s_type);
             return await UniTask.FromResult(result);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async UniTask<T> Instantiate(CancellationToken cancelToken)
+        public async UniTask<T> InstantiateAsync(CancellationToken cancelToken)
         {
             var result = (T)Activator.CreateInstance(s_type);
             return await UniTask.FromResult(result);

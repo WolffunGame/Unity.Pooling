@@ -32,7 +32,7 @@ namespace ZBase.Foundation.Pooling.ScriptablePools
 
             for (int i = 0, count = prefab.PrePoolAmount; i < count; i++)
             {
-                var instance = await prefab.Instantiate(cancelToken);
+                var instance = await prefab.InstantiateAsync(cancelToken);
                 pool.Return(instance);
             }
         }

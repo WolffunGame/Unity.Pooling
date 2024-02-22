@@ -19,7 +19,7 @@ namespace ZBase.Foundation.Pooling
 
         public AsyncPool(UniqueQueue<T> queue)
         {
-            _instantiator = new ActivatorInstantiator<TInstantiator>().Instantiate();
+            _instantiator = new ActivatorInstantiator<TInstantiator>().InstantiateAsync();
             _queue = queue ?? throw new ArgumentNullException(nameof(queue));
         }
 
@@ -61,7 +61,7 @@ namespace ZBase.Foundation.Pooling
             if (_queue.TryDequeue(out var instance))
                 return instance;
 
-            return await _instantiator.Instantiate();
+            return await _instantiator.InstantiateAsync();
         }
 
         public async UniTask<T> Rent(CancellationToken cancelToken)
@@ -69,7 +69,7 @@ namespace ZBase.Foundation.Pooling
             if (_queue.TryDequeue(out var instance))
                 return instance;
 
-            return await _instantiator.Instantiate(cancelToken);
+            return await _instantiator.InstantiateAsync(cancelToken);
         }
 
         public void Return(T instance)

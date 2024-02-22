@@ -19,6 +19,15 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
                 this._poolKeyCache.Add(hash, key = new GameObjectPrefab { Source = gameObjectReference });
             return await Rent(key);
         }
+        
+        public GameObject RentSync(GameObject gameObjectReference)
+        {
+            var hash = gameObjectReference.GetInstanceID();
+            if (!_poolKeyCache.TryGetValue(hash, out var key))
+                this._poolKeyCache.Add(hash, key = new GameObjectPrefab { Source = gameObjectReference });
+            return RentSync(key);
+        }
+
 
         public async UniTask<GameObject> Rent(GameObjectPrefab gameObjectReference)
         {
@@ -33,8 +42,25 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
                 pool.OnPoolEmpty += OnPoolEmpty;
                 this._pools.Add(instanceID, pool);
             }
-
             GameObject item = await pool.Rent();
+            this._dicTrackingInstancePools.Add(item.GetInstanceID(), pool);
+            return item;
+        }
+
+        private GameObject RentSync(GameObjectPrefab gameObjectReference)
+        {
+            var instanceID = gameObjectReference.Source.GetInstanceID();
+            if (!_pools.TryGetValue(instanceID, out var pool))
+            {
+                if (gameObjectReference.Source.scene.IsValid())
+                    throw new Exception($"Non Prefab not supported {gameObjectReference.Source.name}");
+                pool = new GameObjectItemPool(gameObjectReference);
+                pool.OnReturnAction += RemoveTrackingItem;
+                pool.OnItemDestroyAction += RemoveTrackingItem;
+                pool.OnPoolEmpty += OnPoolEmpty;
+                this._pools.Add(instanceID, pool);
+            }
+            GameObject item = pool.RentSync();
             this._dicTrackingInstancePools.Add(item.GetInstanceID(), pool);
             return item;
         }

@@ -12,7 +12,7 @@ namespace ZBase.Foundation.Pooling
         private static readonly Type s_type = typeof(T);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T Instantiate()
+        public T InstantiateAsync()
             => (T)Activator.CreateInstance(s_type);
     }
 }

@@ -8,25 +8,25 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 namespace ZBase.Foundation.Pooling.AddressableAssets
 {
     [Serializable]
-    public class AddressComponentPrefab<T>
-        : AddressPrefab<T>
-        where T : Component
+    public class AddressComponentPrefab<T> : AddressPrefab<T> where T : Component
     {
-        protected override async UniTask<T> Instantiate(
-              string source
+        protected override async UniTask<T> InstantiateAsync(
+            string source
             , Transform parent
             , CancellationToken cancelToken = default
         )
         {
-            AsyncOperationHandle<GameObject> handle;
-
-            if (parent)
-                handle = Addressables.InstantiateAsync(source, parent);
-            else
-                handle = Addressables.InstantiateAsync(source);
-
+            AsyncOperationHandle<GameObject> handle =
+                parent ? Addressables.InstantiateAsync(source, parent) : Addressables.InstantiateAsync(source);
             var gameObject = await handle.WithCancellation(cancelToken);
+            return gameObject.GetComponent<T>();
+        }
 
+        protected override T Instantiate(string source, Transform parent, CancellationToken cancelToken = default)
+        {
+            AsyncOperationHandle<GameObject> handle =
+                parent ? Addressables.InstantiateAsync(source, parent) : Addressables.InstantiateAsync(source);
+            var gameObject = handle.WaitForCompletion();
             return gameObject.GetComponent<T>();
         }
 
@@ -35,5 +35,7 @@ namespace ZBase.Foundation.Pooling.AddressableAssets
             if (instance)
                 Addressables.ReleaseInstance(instance.gameObject);
         }
+
+       
     }
 }

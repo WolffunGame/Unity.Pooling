@@ -13,7 +13,7 @@ namespace Pooling.Sample
     {
         public CubeBoxCollider() : base(){}
 
-        protected override UniTask<BoxCollider> Instantiate(BoxCollider source, Transform parent, CancellationToken cancelToken)
+        protected override UniTask<BoxCollider> InstantiateAsync(BoxCollider source, Transform parent, CancellationToken cancelToken)
         {
             BoxCollider instance;
 

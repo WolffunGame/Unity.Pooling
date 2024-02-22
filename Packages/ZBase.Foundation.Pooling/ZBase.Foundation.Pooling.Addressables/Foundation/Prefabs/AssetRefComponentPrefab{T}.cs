@@ -11,12 +11,20 @@ namespace ZBase.Foundation.Pooling.AddressableAssets
     public class AssetRefComponentPrefab<T> : AssetRefPrefab<T, AssetReferenceGameObject>
         where T : Component
     {
-        protected override async UniTask<T> Instantiate(AssetReferenceGameObject source, Transform parent,
+        protected override async UniTask<T> InstantiateAsync(AssetReferenceGameObject source, Transform parent,
             CancellationToken cancelToken = default)
         {
             AsyncOperationHandle<GameObject> handle =
                 parent ? source.InstantiateAsync(parent, true) : source.InstantiateAsync();
             var gameObject = await handle.WithCancellation(cancelToken);
+            return gameObject.GetComponent<T>();
+        }
+
+        protected override T Instantiate(AssetReferenceGameObject source, Transform parent, CancellationToken cancelToken = default)
+        {
+            AsyncOperationHandle<GameObject> handle =
+                parent ? source.InstantiateAsync(parent, true) : source.InstantiateAsync();
+            var gameObject = handle.WaitForCompletion();
             return gameObject.GetComponent<T>();
         }
 

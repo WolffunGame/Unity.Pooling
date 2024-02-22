@@ -30,7 +30,7 @@ namespace ZBase.Foundation.Pooling.UnityPools
 
             for (int i = 0; i < prefab.PrePoolAmount; i++)
             {
-                var instance = await prefab.Instantiate(cancelToken);
+                var instance = await prefab.InstantiateAsync(cancelToken);
                 pool.Return(instance);
             }
         }

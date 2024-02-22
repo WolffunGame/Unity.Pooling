@@ -11,21 +11,24 @@ namespace ZBase.Foundation.Pooling.ScriptablePools
     )]
     public class ScriptableGameObjectSource : ScriptableSource<GameObject>
     {
-        public override async UniTask<Object> Instantiate(Transform parent, CancellationToken cancelToken = default)
+        public override async UniTask<Object> InstantiateAsync(Transform parent, CancellationToken cancelToken = default)
         {
             var source = Source;
 
             if (source == false)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
-
-            GameObject instance;
-
-            if (parent)
-                instance = Instantiate(source, parent);
-            else
-                instance = Instantiate(source);
-
+            GameObject instance = parent ? Instantiate(source, parent) : Instantiate(source);
             return await UniTask.FromResult(instance);
+        }
+
+        public override Object Instantiate(Transform parent)
+        {
+            var source = Source;
+            if (source == false)
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
+            return parent
+                ? Instantiate(source, parent)
+                : Instantiate(source);
         }
 
         public override void Release(Object instance)

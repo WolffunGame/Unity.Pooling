@@ -15,7 +15,8 @@ namespace Unity.Pooling.Scriptables.AddressableAssets
     public class ScriptableAssetRefGameObjectSource
         : ScriptableAssetRefSource<AssetReferenceGameObject>
     {
-        public override async UniTask<Object> Instantiate(Transform parent, CancellationToken cancelToken = default)
+        public override async UniTask<Object> InstantiateAsync(Transform parent,
+            CancellationToken cancelToken = default)
         {
             var source = Source;
 
@@ -30,6 +31,17 @@ namespace Unity.Pooling.Scriptables.AddressableAssets
                 handle = source.InstantiateAsync();
 
             return await handle.WithCancellation(cancelToken);
+        }
+
+        public override Object Instantiate(Transform parent)
+        {
+            var source = Source;
+
+            if (source == null)
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
+            return parent
+                ? source?.InstantiateAsync(parent, true).WaitForCompletion()
+                : source?.InstantiateAsync().WaitForCompletion();
         }
 
         public override void Release(Object instance)

@@ -9,7 +9,7 @@ namespace ZBase.Foundation.Pooling
         where T : class, new()
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T Instantiate()
+        public T InstantiateAsync()
             => new T();
     }
 }

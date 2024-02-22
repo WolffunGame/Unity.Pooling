@@ -11,11 +11,11 @@ namespace ZBase.Foundation.Pooling
         where T : class, new()
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async UniTask<T> Instantiate()
+        public async UniTask<T> InstantiateAsync()
             => await UniTask.FromResult(new T());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public async UniTask<T> Instantiate(CancellationToken cancelToken)
+        public async UniTask<T> InstantiateAsync(CancellationToken cancelToken)
             => await UniTask.FromResult(new T());
     }
 }

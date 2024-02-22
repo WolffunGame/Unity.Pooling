@@ -11,7 +11,7 @@ namespace ZBase.Foundation.Pooling.UnityPools
         : IUnityPool<T, TPrefab>, IShareable, IDisposable where T : UnityEngine.Object where TPrefab : IPrefab<T>
     {
         public event Action<T> OnItemDestroyAction;
-        
+
         private readonly UniqueQueue<int, T> _queue;
 
         [SerializeField] private TPrefab _prefab;
@@ -68,16 +68,26 @@ namespace ZBase.Foundation.Pooling.UnityPools
         {
             if (_queue.TryDequeue(out var instance))
                 return instance;
-            instance = await _prefab.Instantiate();
+            instance = await _prefab.InstantiateAsync();
             ProcessNewInstance(instance);
             return instance;
         }
+
+        public T RentSync()
+        {
+            if (_queue.TryDequeue(out var instance))
+                return instance;
+            instance = _prefab.Instantiate();
+            ProcessNewInstance(instance);
+            return instance;
+        }
+
 
         public async UniTask<T> Rent(CancellationToken cancelToken)
         {
             if (_queue.TryDequeue(out var instance))
                 return instance;
-            instance = await _prefab.Instantiate(cancelToken);
+            instance = await _prefab.InstantiateAsync(cancelToken);
             ProcessNewInstance(instance);
             return instance;
         }
@@ -91,7 +101,7 @@ namespace ZBase.Foundation.Pooling.UnityPools
             ReturnPreprocess(instance);
             _queue.TryEnqueue(instance.GetInstanceID(), instance);
         }
-        
+
         public virtual void OnPoolItemDestroy(T instance)
         {
             if (!instance)

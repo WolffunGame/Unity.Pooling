@@ -37,26 +37,35 @@ namespace ZBase.Foundation.Pooling.UnityPools
             set => this._prePoolAmount = value;
         }
 
-        public async UniTask<T> Instantiate()
+        public async UniTask<T> InstantiateAsync()
         {
             if (_source is null)
                 throw new NullReferenceException(nameof(Source));
-            return await Instantiate(Source, Parent);
+            return await InstantiateAsync(Source, Parent);
         }
 
-        public async UniTask<T> Instantiate(CancellationToken cancelToken)
+        public async UniTask<T> InstantiateAsync(CancellationToken cancelToken)
         {
             if (_source is null)
                 throw new NullReferenceException(nameof(Source));
-            return await Instantiate(Source, Parent, cancelToken);
+            return await InstantiateAsync(Source, Parent, cancelToken);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected abstract UniTask<T> Instantiate(
+        protected abstract UniTask<T> InstantiateAsync(
             TSource source
             , Transform parent
             , CancellationToken cancelToken = default);
 
+
+        public T Instantiate() => Instantiate(Source, Parent);
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected abstract T Instantiate(
+            TSource source
+            , Transform parent
+            , CancellationToken cancelToken = default);
+        
         public abstract void Release(T instance);
     }
 }

@@ -11,23 +11,28 @@ namespace Unity.Pooling.Scriptables.AddressableAssets
         : ScriptableAssetRefSource<AssetReferenceGameObject>
         where T : Component
     {
-        public override async UniTask<Object> Instantiate(Transform parent, CancellationToken cancelToken = default)
+        public override async UniTask<Object> InstantiateAsync(Transform parent, CancellationToken cancelToken = default)
         {
             var source = Source;
 
             if (source == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
-
-            AsyncOperationHandle<GameObject> handle;
-
-            if (parent)
-                handle = source.InstantiateAsync(parent);
-            else
-                handle = source.InstantiateAsync();
-
+            AsyncOperationHandle<GameObject> handle = default;
+            if (source != null)
+                handle = parent ? source.InstantiateAsync(parent) : source.InstantiateAsync();
             var gameObject = await handle.WithCancellation(cancelToken);
-
             return gameObject.GetComponent<T>();
+        }
+
+        public override Object Instantiate(Transform parent)
+        {
+            var source = Source;
+            if (source == null)
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
+            var gameObject = parent
+                ? source?.InstantiateAsync(parent).WaitForCompletion()
+                : source?.InstantiateAsync().WaitForCompletion();
+            return gameObject != null ? gameObject.GetComponent<T>() : null;
         }
 
         public override void Release(Object instance)

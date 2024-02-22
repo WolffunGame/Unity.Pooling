@@ -1,7 +1,7 @@
 ﻿namespace ZBase.Foundation.Pooling
 {
-    public interface IInstantiable<T>
+    public interface IInstantiable<out T>
     {
-        T Instantiate();
+        T InstantiateAsync();
     }
 }

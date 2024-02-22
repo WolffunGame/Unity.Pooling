@@ -17,7 +17,7 @@ namespace ZBase.Foundation.Pooling
 
         public Pool(UniqueQueue<T> queue)
         {
-            _instantiator = new ActivatorInstantiator<TInstantiator>().Instantiate();
+            _instantiator = new ActivatorInstantiator<TInstantiator>().InstantiateAsync();
             _queue = queue ?? throw new ArgumentNullException(nameof(queue));
         }
 
@@ -59,7 +59,7 @@ namespace ZBase.Foundation.Pooling
             if (_queue.TryDequeue(out var instance))
                 return instance;
 
-            return _instantiator.Instantiate();
+            return _instantiator.InstantiateAsync();
         }
 
         public void Return(T instance)

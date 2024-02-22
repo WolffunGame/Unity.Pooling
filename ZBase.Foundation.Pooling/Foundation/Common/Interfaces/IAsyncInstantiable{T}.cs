@@ -5,6 +5,6 @@ namespace ZBase.Foundation.Pooling
 {
     public interface IAsyncInstantiable<T> : IInstantiable<UniTask<T>>
     {
-        UniTask<T> Instantiate(CancellationToken cancelToken);
+        UniTask<T> InstantiateAsync(CancellationToken cancelToken);
     }
 }

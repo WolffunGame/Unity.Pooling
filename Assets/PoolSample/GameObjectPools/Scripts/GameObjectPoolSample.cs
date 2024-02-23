@@ -21,9 +21,9 @@ namespace Pooling.Sample
             _spawned.Add(item);
         } 
         
-        private async UniTask SpawnByPrefab()
+        private void SpawnByPrefab()
         {
-            var item = await LazyGameObjectPool.Rent(prefab2);
+            var item =  LazyGameObjectPool.RentSync(prefab2);
             item.SetActive(true);
             var pos = Random.insideUnitCircle * _spawnRadius;
             item.transform.position = new Vector3 {x = pos.x, y = 0, z = pos.y};
@@ -39,7 +39,7 @@ namespace Pooling.Sample
                     Spawn().Forget();    
             if (GUI.Button(new Rect(0, 60, 150, 50), "Spawn By Prefab"))
                 for (int i = 0; i < this._spawnCount; i++)
-                    SpawnByPrefab().Forget();
+                    SpawnByPrefab();
             if (GUI.Button(new Rect(0, 120, 150, 50), "DeSpawn All"))
             {
                 foreach (var go in _spawned)

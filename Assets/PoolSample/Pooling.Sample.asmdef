@@ -12,7 +12,8 @@
         "ZBase.Foundation.Pooling",
         "ZBase.Foundation.Pooling.Addressables",
         "Sample.Environment",
-        "ItemPooling"
+        "ItemPooling",
+        "GameObjectLazyPool.Addressables"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

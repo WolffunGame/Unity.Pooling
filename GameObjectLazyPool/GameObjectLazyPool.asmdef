@@ -1,30 +1,18 @@
-﻿{
-  "name": "ItemPooling",
-  "rootNamespace": "ZBase.Foundation.Pooling.ItemPooling",
-  "references": [
-    "UniTask",
-    "UniTask.Addressables",
-    "Unity.Addressables",
-    "Unity.ResourceManager",
-    "ZBase.Collections.Pooled",
-    "ZBase.Foundation.Pooling",
-    "ZBase.Foundation.Pooling.Addressables"
-  ],
-  "includePlatforms": [],
-  "excludePlatforms": [],
-  "allowUnsafeCode": false,
-  "overrideReferences": false,
-  "precompiledReferences": [],
-  "autoReferenced": true,
-  "defineConstraints": [
-    "ZBASE_FOUNDATION_POOLING_ADDRESSABLES"
-  ],
-  "versionDefines": [
-    {
-      "name": "com.unity.addressables",
-      "expression": "",
-      "define": "ZBASE_FOUNDATION_POOLING_ADDRESSABLES"
-    }
-  ],
-  "noEngineReferences": false
+{
+    "name": "ItemPooling",
+    "rootNamespace": "ZBase.Foundation.Pooling.ItemPooling",
+    "references": [
+        "UniTask",
+        "ZBase.Collections.Pooled",
+        "ZBase.Foundation.Pooling"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

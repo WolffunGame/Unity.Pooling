@@ -1,0 +1,30 @@
+{
+    "name": "GameObjectLazyPool.Addressables",
+    "rootNamespace": "",
+    "references": [
+        "ItemPooling",
+        "UniTask",
+        "UniTask.Addressables",
+        "Unity.Addressables",
+        "ZBase.Collections.Pooled",
+        "ZBase.Foundation.Pooling",
+        "ZBase.Foundation.Pooling.Addressables"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "ZBASE_FOUNDATION_POOLING_ADDRESSABLES"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.addressables",
+            "expression": "",
+            "define": "ZBASE_FOUNDATION_POOLING_ADDRESSABLES"
+        }
+    ],
+    "noEngineReferences": false
+}

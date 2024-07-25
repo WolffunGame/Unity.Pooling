@@ -10,6 +10,19 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool.Extensions
     {
         private static GlobalAssetRefGameObjectPool GlobalGameObjectPool => SharedPool.Of<GlobalAssetRefGameObjectPool>();
 
+        #region Preload
+
+        public static async UniTask Preload(string address) =>
+            GlobalGameObjectPool.Return(await GlobalGameObjectPool.Rent(address));
+        
+        public static async UniTask Preload(AssetReferenceGameObject gameObjectReference) =>
+            GlobalGameObjectPool.Return(await GlobalGameObjectPool.Rent(gameObjectReference));
+        
+        public static async UniTask Preload(AssetRefGameObjectPrefab gameObjectReference) =>
+            GlobalGameObjectPool.Return(await GlobalGameObjectPool.Rent(gameObjectReference));
+
+        #endregion
+
         public static async UniTask<GameObject> Rent(string address)
             => await GlobalGameObjectPool.Rent(address);
 
@@ -18,6 +31,22 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool.Extensions
 
         public static async UniTask<GameObject> Rent(AssetRefGameObjectPrefab gameObjectReference)
             => await GlobalGameObjectPool.Rent(gameObjectReference);
+
+        public static async UniTask<GameObject> Rent(AssetRefGameObjectPrefab gameObjectReference, Vector3 pos, bool activeOnSpawn = true)
+        {
+            var go = await GlobalGameObjectPool.Rent(gameObjectReference);
+            go.transform.position = pos;
+            go.SetActive(activeOnSpawn);
+            return go;
+        }
+        
+        public static async UniTask<GameObject> Rent(AssetRefGameObjectPrefab gameObjectReference, Vector3 pos, Quaternion rot, bool activeOnSpawn = true)
+        {
+            var go = await GlobalGameObjectPool.Rent(gameObjectReference);
+            go.transform.SetPositionAndRotation(pos, rot);
+            go.SetActive(activeOnSpawn);
+            return go;
+        }
         
         public static void Return(GameObject gameObject)
             => GlobalGameObjectPool.Return(gameObject);

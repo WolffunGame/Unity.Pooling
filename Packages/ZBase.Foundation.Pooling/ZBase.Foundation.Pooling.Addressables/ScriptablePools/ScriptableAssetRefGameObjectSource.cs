@@ -19,17 +19,11 @@ namespace Unity.Pooling.Scriptables.AddressableAssets
             CancellationToken cancelToken = default)
         {
             var source = Source;
-
             if (source == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
-
-            AsyncOperationHandle<GameObject> handle;
-
-            if (parent)
-                handle = source.InstantiateAsync(parent, true);
-            else
-                handle = source.InstantiateAsync();
-
+            AsyncOperationHandle<GameObject> handle = default;
+            if (source != null)
+                handle = parent ? source.InstantiateAsync(parent, true) : source.InstantiateAsync();
             return await handle.WithCancellation(cancelToken);
         }
 

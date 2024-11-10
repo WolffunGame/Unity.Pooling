@@ -9,11 +9,8 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
 {
     public class GlobalAssetRefGameObjectPool : IPool, IShareable
     {
-        private readonly Dictionary<AssetRefGameObjectPrefab, AssetRefGameObjectItemPool> _pools =
-            new(new AssetRefGameObjectPrefabEqualityComparer());
-
+        private readonly Dictionary<AssetRefGameObjectPrefab, AssetRefGameObjectItemPool> _pools = new(new AssetRefGameObjectPrefabEqualityComparer());
         private readonly Dictionary<int, AssetRefGameObjectItemPool> _dicTrackingInstancePools = new();
-
         private readonly Dictionary<AssetReferenceGameObject, AssetRefGameObjectPrefab> _poolKeyCache = new();
         private readonly Dictionary<string, AssetRefGameObjectPrefab> _poolStringKeyCache = new();
         
@@ -28,9 +25,10 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
 
         public async UniTask<GameObject> Rent(AssetReferenceGameObject gameObjectReference)
         {
-            if (!_poolKeyCache.TryGetValue(gameObjectReference, out var key))
-                _poolKeyCache.Add(gameObjectReference,
-                    key = new AssetRefGameObjectPrefab { Source = gameObjectReference, });
+            if (_poolKeyCache.TryGetValue(gameObjectReference, out var key))
+                return await Rent(key);
+            key = new AssetRefGameObjectPrefab { Source = gameObjectReference };
+            this._poolKeyCache[gameObjectReference] = key;
             return await Rent(key);
         }
 
@@ -44,7 +42,10 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
                 this._pools.Add(gameObjectReference, pool);
             }
             GameObject item = await pool.Rent();
-            _dicTrackingInstancePools.Add(item.GetInstanceID(), pool);
+            var keyInstance = item.GetInstanceID();
+            if (_dicTrackingInstancePools.ContainsKey(keyInstance))
+                Debug.LogError("Duplicate key pool");
+            _dicTrackingInstancePools[keyInstance]= pool;
             return item;
         }
 

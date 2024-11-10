@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 namespace ZBase.Foundation.Pooling.ScriptablePools
 {
     [Serializable]
-    public class UnityObjectPrefab : IPrefab<UnityEngine.Object, ScriptableSource>
+    public class UnityObjectPrefab : IPrefab<Object, ScriptableSource>
     {
         [SerializeField]
         private ScriptableSource _source;

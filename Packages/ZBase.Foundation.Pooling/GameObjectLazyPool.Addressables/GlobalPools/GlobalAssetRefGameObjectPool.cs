@@ -41,10 +41,10 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
                 pool.OnReturnAction += RemoveTrackingItem;
                 this._pools.Add(gameObjectReference, pool);
             }
-            GameObject item = await pool.Rent();
+            var item = await pool.Rent();
             var keyInstance = item.GetInstanceID();
             if (_dicTrackingInstancePools.ContainsKey(keyInstance))
-                Debug.LogError("Duplicate key pool");
+                Debug.LogError($"Duplicate key pool {item.name}");
             _dicTrackingInstancePools[keyInstance]= pool;
             return item;
         }

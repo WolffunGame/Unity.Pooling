@@ -1,7 +1,7 @@
 {
   "name": "com.zbase.foundation.pooling",
   "displayName": "ZBase.Foundation.Pooling",
-  "version": "2.3.17",
+  "version": "2.3.18",
   "unity": "2021.3",
   "documentationUrl": "https://github.com/WolffunGame/Unity.Pooling/blob/main/README.md",
   "dependencies": {

@@ -44,7 +44,7 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
             var item = await pool.Rent();
             var keyInstance = item.GetInstanceID();
             if (_dicTrackingInstancePools.ContainsKey(keyInstance))
-                Debug.LogError($"Duplicate key pool {gameObjectReference.Source.SubObjectName}");
+                Debug.LogError($"Duplicate key pool {gameObjectReference.Source.RuntimeKey.ToString()}");
             _dicTrackingInstancePools[keyInstance]= pool;
             return item;
         }

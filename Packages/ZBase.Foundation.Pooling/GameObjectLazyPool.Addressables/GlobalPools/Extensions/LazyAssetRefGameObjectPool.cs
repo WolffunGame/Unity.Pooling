@@ -57,7 +57,7 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool.Extensions
         public static void ReleaseInstances(int keep, System.Action<GameObject> onReleased = null)
             => GlobalGameObjectPool.ReleaseInstances(keep, onReleased);
         
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void Dispose() => GlobalGameObjectPool.Dispose();
+        // [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        // private static void Dispose() => GlobalGameObjectPool.Dispose();
     }
 }

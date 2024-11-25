@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -13,40 +14,65 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
         private readonly Dictionary<int, AssetRefGameObjectItemPool> _dicTrackingInstancePools = new();
         private readonly Dictionary<AssetReferenceGameObject, AssetRefGameObjectPrefab> _poolKeyCache = new();
         private readonly Dictionary<string, AssetRefGameObjectPrefab> _poolStringKeyCache = new();
-        
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+
         public async UniTask<GameObject> Rent(string address)
         {
-            if (_poolStringKeyCache.TryGetValue(address, out var key))
+            await _semaphore.WaitAsync();
+            try
+            {
+                if (_poolStringKeyCache.TryGetValue(address, out var key))
+                    return await Rent(key);
+                var assetRef = new AssetReferenceGameObject(address);
+                this._poolStringKeyCache.Add(address, key = new AssetRefGameObjectPrefab { Source = assetRef, });
                 return await Rent(key);
-            var assetRef = new AssetReferenceGameObject(address);
-            this._poolStringKeyCache.Add(address, key = new AssetRefGameObjectPrefab { Source = assetRef, });
-            return await Rent(key);
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
 
         public async UniTask<GameObject> Rent(AssetReferenceGameObject gameObjectReference)
         {
-            if (_poolKeyCache.TryGetValue(gameObjectReference, out var key))
+            await _semaphore.WaitAsync();
+            try
+            {
+                if (_poolKeyCache.TryGetValue(gameObjectReference, out var key))
+                    return await Rent(key);
+                key = new AssetRefGameObjectPrefab { Source = gameObjectReference };
+                this._poolKeyCache[gameObjectReference] = key;
                 return await Rent(key);
-            key = new AssetRefGameObjectPrefab { Source = gameObjectReference };
-            this._poolKeyCache[gameObjectReference] = key;
-            return await Rent(key);
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
 
         public async UniTask<GameObject> Rent(AssetRefGameObjectPrefab gameObjectReference)
         {
-            if (!_pools.TryGetValue(gameObjectReference, out var pool))
+            await _semaphore.WaitAsync();
+            try
             {
-                pool = new AssetRefGameObjectItemPool(gameObjectReference);
-                pool.OnItemDestroyAction += RemoveTrackingItem;
-                pool.OnReturnAction += RemoveTrackingItem;
-                this._pools.Add(gameObjectReference, pool);
+                if (!_pools.TryGetValue(gameObjectReference, out var pool))
+                {
+                    pool = new AssetRefGameObjectItemPool(gameObjectReference);
+                    pool.OnItemDestroyAction += RemoveTrackingItem;
+                    pool.OnReturnAction += RemoveTrackingItem;
+                    this._pools.Add(gameObjectReference, pool);
+                }
+                var item = await pool.Rent();
+                var keyInstance = item.GetInstanceID();
+                if (_dicTrackingInstancePools.ContainsKey(keyInstance))
+                    Debug.LogError($"Duplicate key pool {gameObjectReference.Source.RuntimeKey}");
+                _dicTrackingInstancePools[keyInstance] = pool;
+                return item;
             }
-            var item = await pool.Rent();
-            var keyInstance = item.GetInstanceID();
-            if (_dicTrackingInstancePools.ContainsKey(keyInstance))
-                Debug.LogError($"Duplicate key pool {gameObjectReference.Source.RuntimeKey.ToString()}");
-            _dicTrackingInstancePools[keyInstance]= pool;
-            return item;
+            finally
+            {
+                _semaphore.Release();
+            }
         }
 
         public void Return(GameObject gameObject)
@@ -81,6 +107,7 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
             _dicTrackingInstancePools.Clear();
             _poolKeyCache.Clear();
             _poolStringKeyCache.Clear();
+            _semaphore.Dispose();
         }
         
         private class AssetRefGameObjectPrefabEqualityComparer : IEqualityComparer<AssetRefGameObjectPrefab>

@@ -96,16 +96,16 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
                 _semaphore.Release();
 
                 var item = await pool.Rent();
-                
+                while (!item)
+                    item = await pool.Rent();
                 await _semaphore.WaitAsync();
                 var keyInstance = item.GetInstanceID();
                 if (_dicTrackingInstancePools.ContainsKey(keyInstance))
-                {
                     Debug.LogError($"Duplicate key pool {gameObjectReference.Source.RuntimeKey} for instance {keyInstance}");
-                }
+                if(keyInstance == 0)
+                    Debug.LogError($"Invalid Instance {gameObjectReference.Source.RuntimeKey}");
                 _dicTrackingInstancePools[keyInstance] = pool;
                 _semaphore.Release();
-                
                 return item;
             }
             catch (Exception ex)

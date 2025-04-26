@@ -81,7 +81,7 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
         public async UniTask<GameObject> Rent(AssetRefGameObjectPrefab gameObjectReference)
         {
             ThrowIfDisposed();
-            
+    
             AssetRefGameObjectItemPool pool = null;
             try
             {
@@ -95,9 +95,24 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
                 }
                 _semaphore.Release();
 
+                // Sửa phần gây deadlock
                 var item = await pool.Rent();
-                while (!item)
+                int retryCount = 0;
+                const int maxRetries = 5; // Giới hạn số lần thử
+        
+                while (!item && retryCount < maxRetries)
+                {
+                    retryCount++;
+                    await UniTask.NextFrame();
                     item = await pool.Rent();
+                }
+        
+                if (!item)
+                {
+                    Debug.LogError($"Failed to rent item after {maxRetries} attempts from pool {gameObjectReference.Source.RuntimeKey}");
+                    return null;
+                }
+        
                 await _semaphore.WaitAsync();
                 var keyInstance = item.GetInstanceID();
                 if (_dicTrackingInstancePools.ContainsKey(keyInstance))
@@ -115,6 +130,7 @@ namespace ZBase.Foundation.Pooling.GameObjectItem.LazyPool
                 throw;
             }
         }
+
 
         public void Return(GameObject gameObject)
         {
